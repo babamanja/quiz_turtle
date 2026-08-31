@@ -34,7 +34,6 @@ const MESSAGES = {
     btn_add_words: '➕ Добавить',
     add_flow_prompt_primary: 'Введи новое слово на языке «{{langName}}»:',
     add_flow_prompt_learning: 'Введи новое слово на языке «{{langName}}»:',
-    add_flow_done_mock: 'Готово! {{word1}} — {{word2}} добавлено!',
     add_flow_suggestions_intro:
       'В базе уже есть перевод(ы) для этого слова. Нажми на вариант или введи свой перевод ниже.',
     add_flow_done: 'Готово: {{primary}} — {{learning}} (связка #{{pairId}})',
@@ -45,7 +44,6 @@ const MESSAGES = {
     review_cancelled: 'Ок.',
     btn_settings: '⚙️ Настройки',
     keyboard_hint: 'Ниже — постоянные кнопки.',
-    settings_stub: 'Настройки (заглушка).',
     settings_menu_title: 'Настройки',
     btn_settings_change_primary: 'Изменить оригинальный язык',
     btn_settings_change_learning: 'Изменить изучаемый язык',
@@ -95,7 +93,6 @@ const MESSAGES = {
     btn_add_words: '➕ Add',
     add_flow_prompt_primary: 'Enter the new word in {{langName}}:',
     add_flow_prompt_learning: 'Enter the new word in {{langName}}:',
-    add_flow_done_mock: 'Done! {{word1}} - {{word2}} added!',
     add_flow_suggestions_intro:
       'There are already translation(s) in the database. Tap one or type your own below.',
     add_flow_done: 'Done: {{primary}} — {{learning}} (pair #{{pairId}})',
@@ -106,7 +103,6 @@ const MESSAGES = {
     review_cancelled: 'OK.',
     btn_settings: '⚙️ Settings',
     keyboard_hint: 'Persistent buttons below.',
-    settings_stub: 'Settings (stub).',
     settings_menu_title: 'Settings',
     btn_settings_change_primary: 'Change primary language',
     btn_settings_change_learning: 'Change learning language',

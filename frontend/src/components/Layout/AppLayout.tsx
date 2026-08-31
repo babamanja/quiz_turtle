@@ -6,7 +6,15 @@ import { logOut, resendVerificationEmail } from "../../api/auth";
 import { getMySubscription, type MySubscription } from "../../api/subscription";
 import { MEDIA_MOBILE } from "../../constants/breakpoints";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
-import { DICTIONARIES_PATH, FEEDBACK_PATH, homePathForRole, USER_HOME_PATH, WORDS_PATH } from "../../paths";
+import {
+  ADMIN_STORIES_PATH,
+  DICTIONARIES_PATH,
+  FEEDBACK_PATH,
+  homePathForRole,
+  STORIES_PATH,
+  USER_HOME_PATH,
+  WORDS_PATH,
+} from "../../paths";
 import { clearStoredSession, getStoredUser, subscribeToSession } from "../../userStorage";
 import Button from "../UI/Button/Button";
 
@@ -22,6 +30,7 @@ const USER_NAV_ITEMS: NavItem[] = [
   { to: USER_HOME_PATH, labelKey: "nav.dashboard", end: true },
   { to: WORDS_PATH, labelKey: "nav.words" },
   { to: DICTIONARIES_PATH, labelKey: "nav.dictionaries" },
+  { to: STORIES_PATH, labelKey: "nav.stories" },
   { to: "/billing-history", labelKey: "nav.billing" },
   { to: "/profile", labelKey: "nav.profile" },
   { to: FEEDBACK_PATH, labelKey: "nav.feedback" },
@@ -36,10 +45,10 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { to: "/admin/tags", labelKey: "nav.adminTags" },
   { to: "/admin/languages", labelKey: "nav.adminLanguages" },
   { to: "/admin/words", labelKey: "nav.adminWords" },
+  { to: ADMIN_STORIES_PATH, labelKey: "nav.adminStories" },
   { to: "/admin/translations", labelKey: "nav.adminTranslations" },
   { to: "/admin/user-pairs", labelKey: "nav.adminUserPairs" },
   { to: "/admin/ai-usage", labelKey: "nav.adminAiUsage" },
-  { to: "/admin/test-components", labelKey: "nav.adminTestComponents" },
 ];
 
 export default function AppLayout() {

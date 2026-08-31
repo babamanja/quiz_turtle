@@ -1,6 +1,6 @@
 import type { Context } from 'telegraf';
 import type { PrismaClient } from '@prisma/client';
-import { evaluateVocabAnswer } from '@vocab-bot/shared/vocabReviewAnswer';
+import { evaluateVocabAnswer } from '@language-turtle/shared';
 import {
   applyReviewResult,
   getRandomDueWordsForUser,

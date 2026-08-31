@@ -1,5 +1,4 @@
-import { canonicalWordPairIds, resolvePairWordsForUser } from "@vocab-bot/shared/vocabPair";
-import type { VocabPairRelationType } from "@vocab-bot/shared/vocabPairRelation";
+import { canonicalWordPairIds, resolvePairWordsForUser, type VocabPairRelationType } from "@language-turtle/shared";
 import type { Prisma } from "@prisma/client";
 import { getPrisma } from "./prisma.js";
 

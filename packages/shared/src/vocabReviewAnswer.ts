@@ -85,7 +85,3 @@ export function evaluateVocabAnswer(
 
   return "wrong";
 }
-
-export function matchesVocabAnswer(userAnswer: string, expected: string): boolean {
-  return evaluateVocabAnswer(userAnswer, expected) === "exact";
-}

@@ -1,4 +1,4 @@
-import { scheduleAfterCorrect, scheduleAfterWrong } from "@vocab-bot/shared/pimsleurSchedule";
+import { scheduleAfterCorrect, scheduleAfterWrong } from "@language-turtle/shared";
 
 import type { ReviewResult, ReviewWord } from "../../api/words";
 
@@ -6,14 +6,12 @@ export function reviewScheduleForDisplay(
   card: ReviewWord,
   revealed: ReviewResult & { awaitingConfirmation?: boolean },
 ): { pimsleurLevel: number; nextReviewMs: number } {
-  if (
-    Number.isFinite(revealed.pimsleurLevel) &&
-    Number.isFinite(revealed.nextReviewMs) &&
-    revealed.nextReviewMs > 0
-  ) {
+  const level = revealed.pimsleurLevel;
+  const dueAt = revealed.nextReviewMs;
+  if (level != null && dueAt != null && Number.isFinite(level) && Number.isFinite(dueAt) && dueAt > 0) {
     return {
-      pimsleurLevel: revealed.pimsleurLevel,
-      nextReviewMs: revealed.nextReviewMs,
+      pimsleurLevel: level,
+      nextReviewMs: dueAt,
     };
   }
 

@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { normalizeAppEnv, type AppEnv } from "./appEnv.js";
+import { hostToOrigin } from "./publicOrigins.js";
 
 export type { AppEnv } from "./appEnv.js";
 
@@ -14,19 +15,6 @@ const backendEnvPath = resolve(moduleDir, "../../.env");
 function syncViteGoogleClientId(): void {
   if (!process.env.VITE_GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_ID?.trim()) {
     process.env.VITE_GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID.trim();
-  }
-}
-
-function hostToOrigin(raw: string | undefined): string {
-  const trimmed = (raw ?? "").trim();
-  if (!trimmed) {
-    return "";
-  }
-  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  try {
-    return new URL(withProtocol).origin;
-  } catch {
-    return "";
   }
 }
 

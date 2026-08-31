@@ -1,11 +1,5 @@
-const STORAGE_KEY = "quizbuddy_cookie_consent";
+const STORAGE_KEY = "language_turtle_cookie_consent";
 const ACKNOWLEDGED_VALUE = "accepted";
-
-const listeners = new Set<() => void>();
-
-function notifyListeners() {
-  listeners.forEach((listener) => listener());
-}
 
 /** Whether the user has dismissed the cookie usage notice. */
 export function hasCookieNoticeAcknowledged(): boolean {
@@ -20,12 +14,4 @@ export function acknowledgeCookieNotice(): void {
     return;
   }
   window.localStorage.setItem(STORAGE_KEY, ACKNOWLEDGED_VALUE);
-  notifyListeners();
-}
-
-export function subscribeCookieNotice(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
 }

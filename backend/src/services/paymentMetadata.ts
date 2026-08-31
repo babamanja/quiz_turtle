@@ -29,10 +29,6 @@ export function buildPaymentReturnUrl(appBaseUrl: string, paymentId: string): st
   return `${normalizedBaseUrl}/payment?paymentId=${encodeURIComponent(paymentId)}`;
 }
 
-export function buildCheckoutUrl(appBaseUrl: string, paymentId: string): string {
-  return buildPaymentReturnUrl(appBaseUrl, paymentId);
-}
-
 export function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -143,7 +139,7 @@ export function buildPaymentStatusResponse(
     status: payment.status,
     checkoutUrl: shouldAllowResume
       ? (readCheckoutUrl(payment.metadata) ??
-        buildCheckoutUrl(appBaseUrl, payment.id))
+        buildPaymentReturnUrl(appBaseUrl, payment.id))
       : null,
     failureReason: readFailureReason(payment.metadata),
   };

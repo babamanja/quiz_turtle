@@ -6,23 +6,23 @@
     "relatedLabel": "Related policies",
     "privacy": {
       "title": "Privacy Policy",
-      "lastUpdatedDate": "May 18, 2026",
+      "lastUpdatedDate": "August 25, 2026",
       "sections": [
         {
           "title": "1. Introduction",
           "paragraphs": [
-            "QuizBuddy (\"we\", \"us\", or \"our\") provides an online service that turns study materials into AI-generated quizzes. This Privacy Policy explains how we collect, use, disclose, and protect personal information when you visit our website, create an account, or use our product.",
-            "By using QuizBuddy, you agree to the practices described in this policy. If you do not agree, please do not use the service."
+            "Language Turtle (\"we\", \"us\", or \"our\") provides a vocabulary learning service: a web app and a Telegram bot for adding words, spaced-repetition practice, dictionaries, and adaptive reading stories. This Privacy Policy explains how we collect, use, disclose, and protect personal information when you visit our website, create an account, link Telegram, or use our product.",
+            "By using Language Turtle, you agree to the practices described in this policy. If you do not agree, please do not use the service."
           ]
         },
         {
           "title": "2. Information we collect",
           "paragraphs": ["We may collect the following categories of information:"],
           "list": [
-            "Account information such as your name, email address, password hash, and authentication provider identifiers when you sign up or sign in.",
-            "Content you upload or submit, including documents, text, and quiz-related data you create in the product.",
+            "Account information such as your name, email address, password hash, Google authentication identifiers, and Telegram user id or username when you sign up, sign in, or link accounts.",
+            "Learning content you create or store, including vocabulary pairs, dictionary entries, review progress, language preferences, story unlock progress, and feedback you submit.",
             "Usage and technical data such as IP address, browser type, device information, pages viewed, and product interaction events.",
-            "Billing information processed by our payment partners. We do not store full payment card numbers on our servers.",
+            "Billing information processed by our payment partners (for example Paddle or Telegram Stars). We do not store full payment card numbers on our servers.",
             "Communications you send to us, including support requests and feedback."
           ]
         },
@@ -30,21 +30,21 @@
           "title": "3. How we use information",
           "paragraphs": ["We use personal information to:"],
           "list": [
-            "Provide, operate, maintain, and improve QuizBuddy.",
-            "Generate quizzes and related learning features from materials you submit.",
+            "Provide, operate, maintain, and improve Language Turtle, including web and Telegram practice flows.",
+            "Schedule spaced-repetition reviews, sync progress across linked accounts, and show adaptive stories.",
             "Authenticate users, secure accounts, and prevent fraud or abuse.",
             "Process subscriptions, payments, and billing history.",
-            "Send service-related messages, such as account notices and security alerts.",
+            "Send service-related messages, such as account notices, email verification, and security alerts.",
             "Analyze product usage to understand performance and improve the experience.",
             "Comply with legal obligations and enforce our Terms of Service."
           ]
         },
         {
-          "title": "4. AI processing and uploaded files",
+          "title": "4. Learning data and Telegram",
           "paragraphs": [
-            "When you upload study materials, we process that content to generate quizzes, explanations, and related outputs. This processing may involve third-party AI or cloud infrastructure providers acting on our instructions.",
-            "Do not upload content you do not have the right to use, or content that contains sensitive personal data you do not want processed for quiz generation.",
-            "We retain uploaded content and generated outputs for as long as needed to provide the service, comply with law, resolve disputes, and enforce our agreements, unless you delete the content or your account where deletion features are available."
+            "Your vocabulary, review schedules, and story progress are stored so we can provide the Service across the web app and, when linked, the Telegram bot.",
+            "If you link Telegram to a web account, we associate your Telegram identifier with that account so practice and progress can stay in sync. You can unlink Telegram from your profile when another login method remains available.",
+            "We retain learning content and account data for as long as needed to provide the service, comply with law, resolve disputes, and enforce our agreements, unless you delete the content or your account where deletion features are available."
           ]
         },
         {
@@ -58,7 +58,7 @@
           "title": "6. How we share information",
           "paragraphs": ["We may share information with:"],
           "list": [
-            "Service providers that help us host infrastructure, process payments, deliver email, provide analytics, or operate AI features.",
+            "Service providers that help us host infrastructure, process payments, deliver email, provide analytics, or operate the Telegram bot integration.",
             "Professional advisers and authorities when required by law, court order, or to protect rights, safety, and security.",
             "A successor entity in connection with a merger, acquisition, or sale of assets, subject to appropriate safeguards."
           ],
@@ -95,7 +95,7 @@
         {
           "title": "11. Children",
           "paragraphs": [
-            "QuizBuddy is not directed to children under 13, and we do not knowingly collect personal information from children under 13. If you believe a child has provided us personal information, contact us and we will take appropriate steps to delete it."
+            "Language Turtle is not directed to children under 13, and we do not knowingly collect personal information from children under 13. If you believe a child has provided us personal information, contact us and we will take appropriate steps to delete it."
           ]
         },
         {
@@ -107,49 +107,49 @@
         {
           "title": "13. Contact us",
           "paragraphs": [
-            "If you have questions about this Privacy Policy or our privacy practices, contact us at privacy@quizbuddy.io."
+            "If you have questions about this Privacy Policy or our privacy practices, contact us at privacy@languageturtle.app."
           ]
         }
       ]
     },
     "terms": {
       "title": "Terms of Service",
-      "lastUpdatedDate": "May 18, 2026",
+      "lastUpdatedDate": "August 25, 2026",
       "sections": [
         {
           "title": "1. Agreement",
           "paragraphs": [
-            "These Terms of Service (\"Terms\") govern your access to and use of QuizBuddy, including our website, applications, and related services (collectively, the \"Service\").",
+            "These Terms of Service (\"Terms\") govern your access to and use of Language Turtle, including our website, Telegram bot, and related services (collectively, the \"Service\").",
             "By creating an account or using the Service, you agree to these Terms and to our Privacy Policy. If you do not agree, do not use the Service."
           ]
         },
         {
           "title": "2. Eligibility",
           "paragraphs": [
-            "You must be at least 13 years old to use QuizBuddy. If you are under the age of majority where you live, you may use the Service only with permission from a parent or legal guardian who accepts these Terms on your behalf."
+            "You must be at least 13 years old to use Language Turtle. If you are under the age of majority where you live, you may use the Service only with permission from a parent or legal guardian who accepts these Terms on your behalf."
           ]
         },
         {
           "title": "3. Accounts and security",
           "paragraphs": [
-            "You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account.",
+            "You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account, including activity through a linked Telegram account.",
             "You agree to provide accurate information and to notify us promptly of any unauthorized use of your account."
           ]
         },
         {
           "title": "4. Subscriptions and payments",
           "paragraphs": [
-            "Some features require a paid plan or subscription. Prices, billing intervals, and included features are shown at checkout or in the product and may change with notice where required.",
-            "Payments are processed by third-party payment providers. By purchasing a plan, you authorize us and our payment partners to charge the applicable fees, taxes, and recurring amounts until you cancel in accordance with the billing terms presented at purchase.",
+            "Some features may require a paid plan (Premium). Prices, billing intervals, and included features are shown at checkout, in the web subscription page, or in the Telegram bot, and may change with notice where required.",
+            "Payments are processed by third-party payment providers such as Paddle (web) or Telegram Stars (bot). By purchasing a plan, you authorize us and our payment partners to charge the applicable fees and taxes according to the billing terms presented at purchase.",
             "Except where required by law, fees are non-refundable once a billing period has started. We may suspend or limit access if payment fails."
           ]
         },
         {
           "title": "5. Your content and license",
           "paragraphs": [
-            "You retain ownership of materials you upload and quizzes you create, subject to third-party rights in the underlying content.",
-            "You grant QuizBuddy a worldwide, non-exclusive license to host, store, reproduce, process, and display your content solely to operate, provide, and improve the Service, including to generate quizzes and related outputs using automated systems.",
-            "You represent that you have the rights needed to upload and use your content with the Service and that your content does not violate law or the rights of others."
+            "You retain ownership of vocabulary and other learning content you add to the Service, subject to third-party rights in any underlying materials.",
+            "You grant Language Turtle a worldwide, non-exclusive license to host, store, reproduce, process, and display your content solely to operate, provide, and improve the Service, including spaced-repetition scheduling, dictionaries, account linking, and adaptive stories.",
+            "You represent that you have the rights needed to add and use your content with the Service and that your content does not violate law or the rights of others."
           ]
         },
         {
@@ -159,28 +159,28 @@
             "Use the Service for unlawful, harmful, fraudulent, or abusive purposes.",
             "Upload malware, attempt to gain unauthorized access, or interfere with the Service or its security.",
             "Reverse engineer, scrape, or misuse the Service except as permitted by law.",
-            "Use the Service to generate or distribute content that infringes intellectual property, privacy, or other rights.",
+            "Pollute shared catalogs (such as languages) or harass other users through the bot or web app.",
             "Resell, sublicense, or commercially exploit the Service except as expressly allowed by us in writing."
           ]
         },
         {
-          "title": "7. AI-generated output",
+          "title": "7. Learning outcomes",
           "paragraphs": [
-            "QuizBuddy uses automated systems to generate quizzes and related content. Outputs may be inaccurate, incomplete, or unsuitable for a particular purpose.",
-            "You are responsible for reviewing outputs before relying on them for study, assessment, or any high-stakes use. The Service is provided for learning support and does not guarantee academic outcomes."
+            "Language Turtle helps you practice vocabulary through spaced repetition, reviews, and stories. Progress tools and schedules are learning aids and may not match every study goal.",
+            "You are responsible for how you use the Service. We do not guarantee language fluency, exam results, or any specific learning outcome."
           ]
         },
         {
           "title": "8. Intellectual property",
           "paragraphs": [
-            "The Service, including its software, design, branding, and documentation, is owned by QuizBuddy or its licensors and is protected by intellectual property laws.",
+            "The Service, including its software, design, branding, and documentation, is owned by Language Turtle or its licensors and is protected by intellectual property laws.",
             "Except for the limited rights expressly granted in these Terms, no rights are transferred to you."
           ]
         },
         {
           "title": "9. Third-party services",
           "paragraphs": [
-            "The Service may integrate with or link to third-party services, including authentication, payment, analytics, and AI providers. Your use of those services may be subject to separate terms and privacy policies."
+            "The Service may integrate with or link to third-party services, including Telegram, authentication providers, payment processors, email delivery, and analytics. Your use of those services may be subject to separate terms and privacy policies."
           ]
         },
         {
@@ -200,20 +200,20 @@
         {
           "title": "12. Limitation of liability",
           "paragraphs": [
-            "TO THE MAXIMUM EXTENT PERMITTED BY LAW, QUIZBUDDY AND ITS AFFILIATES, OFFICERS, EMPLOYEES, AND SUPPLIERS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR RELATED TO YOUR USE OF THE SERVICE.",
+            "TO THE MAXIMUM EXTENT PERMITTED BY LAW, LANGUAGE TURTLE AND ITS AFFILIATES, OFFICERS, EMPLOYEES, AND SUPPLIERS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR RELATED TO YOUR USE OF THE SERVICE.",
             "OUR TOTAL LIABILITY FOR ANY CLAIM ARISING OUT OF OR RELATING TO THE SERVICE WILL NOT EXCEED THE GREATER OF (A) THE AMOUNTS YOU PAID TO US FOR THE SERVICE IN THE TWELVE MONTHS BEFORE THE CLAIM OR (B) USD $100."
           ]
         },
         {
           "title": "13. Indemnification",
           "paragraphs": [
-            "You will defend, indemnify, and hold harmless QuizBuddy and its affiliates from claims, damages, losses, and expenses (including reasonable legal fees) arising out of your content, your use of the Service, or your violation of these Terms or applicable law."
+            "You will defend, indemnify, and hold harmless Language Turtle and its affiliates from claims, damages, losses, and expenses (including reasonable legal fees) arising out of your content, your use of the Service, or your violation of these Terms or applicable law."
           ]
         },
         {
           "title": "14. Governing law",
           "paragraphs": [
-            "These Terms are governed by the laws applicable in the jurisdiction where QuizBuddy operates, without regard to conflict-of-law rules, except where mandatory consumer protection laws in your country require otherwise."
+            "These Terms are governed by the laws applicable in the jurisdiction where Language Turtle operates, without regard to conflict-of-law rules, except where mandatory consumer protection laws in your country require otherwise."
           ]
         },
         {
@@ -225,34 +225,34 @@
         {
           "title": "16. Contact",
           "paragraphs": [
-            "Questions about these Terms may be sent to legal@quizbuddy.io."
+            "Questions about these Terms may be sent to legal@languageturtle.app."
           ]
         }
       ]
     },
     "refund": {
       "title": "Refund Policy",
-      "lastUpdatedDate": "May 18, 2026",
+      "lastUpdatedDate": "August 25, 2026",
       "sections": [
         {
           "title": "1. Overview",
           "paragraphs": [
-            "This Refund Policy explains how refunds work for paid subscriptions and other charges on QuizBuddy (\"we\", \"us\", or \"our\").",
+            "This Refund Policy explains how refunds work for paid subscriptions and other charges on Language Turtle (\"we\", \"us\", or \"our\").",
             "By making a purchase, you also agree to our Terms of Service. If this policy conflicts with mandatory consumer protection laws in your country, those laws prevail."
           ]
         },
         {
           "title": "2. Payment processor",
           "paragraphs": [
-            "Payments are processed by our third-party payment partner (such as Paddle). Your card or wallet provider may show their name on statements.",
+            "Web payments are typically processed by our third-party payment partner (such as Paddle). In-bot purchases may use Telegram Stars. Your card, wallet, or Telegram statement may show the processor's name.",
             "Refund requests may need to be handled through the same payment channel used for the original purchase, subject to the processor's rules and timelines."
           ]
         },
         {
           "title": "3. Subscriptions",
           "paragraphs": [
-            "Premium subscriptions renew automatically for the billing period you select (for example, monthly or yearly) until you cancel.",
-            "You can cancel renewal at any time from your account subscription settings. Cancellation stops future charges; it does not automatically refund amounts already paid for the current billing period.",
+            "Premium access is sold for a billing period you select (for example, monthly or yearly). Renewal behavior and cancellation options are shown at checkout and in your subscription settings.",
+            "You can manage or cancel from your account subscription settings where available. Cancellation stops future charges according to the terms presented at purchase; it does not automatically refund amounts already paid for the current billing period.",
             "Except where required by law, subscription fees are generally non-refundable once a billing period has started. If you cancel, you typically retain access to paid features until the end of the period you already paid for."
           ]
         },
@@ -276,8 +276,8 @@
         {
           "title": "6. How to request a refund",
           "paragraphs": [
-            "To request a refund, email refunds@quizbuddy.io from the email address associated with your account. Include your full name, the date of purchase, the amount charged, and a brief description of the issue.",
-            "We aim to respond within a reasonable time. Approved refunds are issued to the original payment method; processing times depend on your bank or card issuer and may take several business days."
+            "To request a refund, email refunds@languageturtle.app from the email address associated with your account. Include your full name, the date of purchase, the amount charged, and a brief description of the issue.",
+            "We aim to respond within a reasonable time. Approved refunds are issued to the original payment method; processing times depend on your bank, card issuer, or Telegram and may take several business days."
           ]
         },
         {
@@ -295,7 +295,7 @@
         {
           "title": "9. Contact",
           "paragraphs": [
-            "Questions about refunds may be sent to refunds@quizbuddy.io. For general legal inquiries, see our Terms of Service."
+            "Questions about refunds may be sent to refunds@languageturtle.app. For general legal inquiries, see our Terms of Service."
           ]
         }
       ]

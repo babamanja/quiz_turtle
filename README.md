@@ -1,6 +1,6 @@
-# Vocab Bot Monorepo
+# Language Turtle Monorepo
 
-Telegram vocabulary bot with admin web panel, Paddle + Telegram Stars subscriptions, and shared infrastructure from AI Tutor.
+Telegram vocabulary bot (Language Turtle) with admin web panel and Paddle + Telegram Stars subscriptions.
 
 ## Workspaces
 
@@ -24,7 +24,7 @@ Telegram vocabulary bot with admin web panel, Paddle + Telegram Stars subscripti
 
 ## Deploy (Vercel)
 
-Monorepo deploys from the **repository root** (same layout as AI Tutor).
+Monorepo deploys from the **repository root**.
 
 ### Vercel project settings
 

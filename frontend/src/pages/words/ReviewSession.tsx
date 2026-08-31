@@ -267,7 +267,6 @@ export default function ReviewSession({ embedded = false, trackOpen = true }: Re
             {reviewSchedule ? (
               <ForgettingCurve
                 compact
-                animateMarker
                 pimsleurLevel={reviewSchedule.pimsleurLevel}
                 nextReviewMs={reviewSchedule.nextReviewMs}
               />

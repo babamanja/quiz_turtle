@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -15,7 +14,6 @@ initializeAnalytics();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <Analytics />
       <SpeedInsights />
       <PageViewTracker />
       <App />

@@ -1,42 +1,24 @@
 import { intervalMsForLevel, PIMSLEUR_LEVEL_MAX } from "./pimsleurSchedule.js";
 
-/** @deprecated Use {@link reviewRetentionThresholdForLevel} for per-level thresholds. */
-export const REVIEW_RETENTION_THRESHOLD = 0.7;
+const REVIEW_RETENTION_THRESHOLD = 0.7;
 
-/**
- * Share of memory lost by review time per stage (level 0 = first interval).
- * Retention at review = 1 − loss.
- */
 const REVIEW_LOSS_FRACTION_BY_LEVEL: readonly number[] = [
-  1.0, // 100%
-  0.6, // 60%
-  0.4, // 40%
-  0.3, // 30%
-  0.2, // 20% for levels 4–10
-  0.2,
-  0.2,
-  0.2,
-  0.2,
-  0.2,
-  0.2,
+  1.0, 0.6, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
 ];
 
 if (REVIEW_LOSS_FRACTION_BY_LEVEL.length !== PIMSLEUR_LEVEL_MAX + 1) {
   throw new Error("REVIEW_LOSS_FRACTION_BY_LEVEL must have length PIMSLEUR_LEVEL_MAX + 1");
 }
 
-/** Fraction of memory lost by the time the next review is due (0–1). */
-export function reviewLossFractionForLevel(level: number): number {
+function reviewLossFractionForLevel(level: number): number {
   const clamped = Math.max(0, Math.min(level, PIMSLEUR_LEVEL_MAX));
   return REVIEW_LOSS_FRACTION_BY_LEVEL[clamped] ?? 0.2;
 }
 
-/** Retention at review time for a Pimsleur stage (1 − loss). */
 export function reviewRetentionThresholdForLevel(level: number): number {
   return 1 - reviewLossFractionForLevel(level);
 }
 
-/** Used only to compute tau when the review threshold is 0 or 1 (log is undefined at exactly 0/1). */
 const REVIEW_RETENTION_EPSILON = 1e-9;
 
 function decayThresholdForTau(threshold: number): number {
@@ -71,311 +53,29 @@ export function retentionAtElapsed(
   return Math.max(0, Math.min(1, retention));
 }
 
-export type ForgettingCurveWindow = {
+export type CurrentRetention = {
+  level: number;
   intervalMs: number;
-  lastReviewMs: number;
-  nextReviewMs: number;
-  elapsedMs: number;
+  progress: number;
   retention: number;
   isOverdue: boolean;
 };
 
-export function cumulativeOffsetBeforeLevel(level: number): number {
-  const clamped = Math.max(0, Math.min(level, PIMSLEUR_LEVEL_MAX));
-  let sum = 0;
-  for (let i = 0; i < clamped; i += 1) {
-    sum += intervalMsForLevel(i);
-  }
-  return sum;
-}
-
-export function computeForgettingCurveWindow(
+export function currentRetention(
   pimsleurLevel: number,
   nextReviewMs: number,
   nowMs: number = Date.now(),
-): ForgettingCurveWindow {
+): CurrentRetention {
   const level = Math.max(0, Math.min(pimsleurLevel, PIMSLEUR_LEVEL_MAX));
   const intervalMs = intervalMsForLevel(level);
   const threshold = reviewRetentionThresholdForLevel(level);
-  const lastReviewMs = nextReviewMs - intervalMs;
   const isOverdue = nowMs >= nextReviewMs;
-  const elapsedMs = isOverdue ? intervalMs : Math.max(0, nowMs - lastReviewMs);
-  const retention = isOverdue
-    ? threshold
-    : retentionAtElapsed(elapsedMs, intervalMs, threshold);
-
+  const elapsedMs = isOverdue ? intervalMs : Math.max(0, nowMs - (nextReviewMs - intervalMs));
   return {
+    level,
     intervalMs,
-    lastReviewMs,
-    nextReviewMs,
-    elapsedMs,
-    retention,
+    progress: intervalMs > 0 ? Math.min(1, elapsedMs / intervalMs) : 0,
+    retention: isOverdue ? threshold : retentionAtElapsed(elapsedMs, intervalMs, threshold),
     isOverdue,
   };
-}
-
-export type RollerCoasterSegment = {
-  level: number;
-  intervalMs: number;
-  timelineStartMs: number;
-  timelineEndMs: number;
-};
-
-export type FullLadderSegment = {
-  level: number;
-  intervalMs: number;
-};
-
-export type FullLadderTimeline = {
-  pimsleurLevel: number;
-  segments: FullLadderSegment[];
-  elapsedInCurrentMs: number;
-  currentSegmentProgress: number;
-  retention: number;
-  isOverdue: boolean;
-};
-
-export type FullLadderPoint = {
-  segmentIndex: number;
-  segmentProgress: number;
-  retention: number;
-  phase: "past" | "current" | "future";
-};
-
-export function totalLadderTimelineMs(segments: Array<{ intervalMs: number }>): number {
-  return segments.reduce((sum, segment) => sum + segment.intervalMs, 0);
-}
-
-export function timelineMsAtSegmentProgress(
-  segments: Array<{ intervalMs: number }>,
-  segmentIndex: number,
-  segmentProgress: number,
-): number {
-  let ms = 0;
-  for (let i = 0; i < segmentIndex; i += 1) {
-    ms += segments[i]!.intervalMs;
-  }
-  if (segmentIndex >= 0 && segmentIndex < segments.length) {
-    ms += segmentProgress * segments[segmentIndex]!.intervalMs;
-  }
-  return ms;
-}
-
-/** Map elapsed time to [0, 1] on a linear axis. */
-export function mapTimelineMsToLinearAxisUnit(timelineMs: number, totalMs: number): number {
-  if (totalMs <= 0) {
-    return 0;
-  }
-  return Math.max(0, Math.min(1, timelineMs / totalMs));
-}
-
-/** Map elapsed time to [0, 1] on a log10 axis (0 ms maps to 0). */
-export function mapTimelineMsToLogAxisUnit(timelineMs: number, totalMs: number): number {
-  if (totalMs <= 0 || timelineMs <= 0) {
-    return 0;
-  }
-  const log = (ms: number) => Math.log10(ms + 1);
-  return log(timelineMs) / log(totalMs);
-}
-
-export function computeFullLadderTimeline(
-  pimsleurLevel: number,
-  nextReviewMs: number,
-  nowMs: number = Date.now(),
-): FullLadderTimeline {
-  const level = Math.max(0, Math.min(pimsleurLevel, PIMSLEUR_LEVEL_MAX));
-  const window = computeForgettingCurveWindow(level, nextReviewMs, nowMs);
-
-  const segments: FullLadderSegment[] = [];
-  for (let i = 0; i <= PIMSLEUR_LEVEL_MAX; i += 1) {
-    segments.push({
-      level: i,
-      intervalMs: intervalMsForLevel(i),
-    });
-  }
-
-  const currentSegmentProgress = window.isOverdue
-    ? 1
-    : window.intervalMs > 0
-      ? window.elapsedMs / window.intervalMs
-      : 0;
-
-  return {
-    pimsleurLevel: level,
-    segments,
-    elapsedInCurrentMs: window.elapsedMs,
-    currentSegmentProgress,
-    retention: window.retention,
-    isOverdue: window.isOverdue,
-  };
-}
-
-export function sampleFullLadderCurve(
-  timeline: FullLadderTimeline,
-  stepsPerSegment = 14,
-  options?: { projectCurrentSegment?: boolean },
-): FullLadderPoint[] {
-  const points: FullLadderPoint[] = [];
-  const { segments, pimsleurLevel, currentSegmentProgress, isOverdue } = timeline;
-  const projectCurrentSegment = options?.projectCurrentSegment ?? false;
-
-  for (let segmentIndex = 0; segmentIndex < segments.length; segmentIndex += 1) {
-    const segment = segments[segmentIndex];
-    const phase: FullLadderPoint["phase"] =
-      segmentIndex < pimsleurLevel
-        ? "past"
-        : segmentIndex > pimsleurLevel
-          ? "future"
-          : "current";
-
-    const maxProgress =
-      phase === "past"
-        ? 1
-        : phase === "future"
-          ? 1
-          : isOverdue
-            ? 1
-            : projectCurrentSegment
-              ? Math.max(currentSegmentProgress, 1)
-              : currentSegmentProgress;
-
-    const steps = Math.max(2, Math.round(maxProgress * stepsPerSegment));
-
-    for (let i = 0; i <= steps; i += 1) {
-      const segmentProgress = (maxProgress * i) / steps;
-      const threshold = reviewRetentionThresholdForLevel(segment.level);
-      points.push({
-        segmentIndex,
-        segmentProgress,
-        retention: retentionAtElapsed(segmentProgress * segment.intervalMs, segment.intervalMs, threshold),
-        phase,
-      });
-    }
-
-    if (phase !== "current" && segmentIndex < segments.length - 1) {
-      const threshold = reviewRetentionThresholdForLevel(segment.level);
-      points.push({
-        segmentIndex,
-        segmentProgress: 1,
-        retention: threshold,
-        phase,
-      });
-      points.push({
-        segmentIndex,
-        segmentProgress: 1,
-        retention: 1,
-        phase,
-      });
-    }
-  }
-
-  return points;
-}
-
-export type RollerCoasterTimeline = {
-  pimsleurLevel: number;
-  segments: RollerCoasterSegment[];
-  timelineNowMs: number;
-  nextReviewTimelineMs: number;
-  retention: number;
-  isOverdue: boolean;
-};
-
-export function computeRollerCoasterTimeline(
-  pimsleurLevel: number,
-  nextReviewMs: number,
-  nowMs: number = Date.now(),
-): RollerCoasterTimeline {
-  const level = Math.max(0, Math.min(pimsleurLevel, PIMSLEUR_LEVEL_MAX));
-  const window = computeForgettingCurveWindow(level, nextReviewMs, nowMs);
-
-  const segments: RollerCoasterSegment[] = [];
-  for (let i = 0; i <= level; i += 1) {
-    const intervalMs = intervalMsForLevel(i);
-    const timelineStartMs = cumulativeOffsetBeforeLevel(i);
-    segments.push({
-      level: i,
-      intervalMs,
-      timelineStartMs,
-      timelineEndMs: timelineStartMs + intervalMs,
-    });
-  }
-
-  return {
-    pimsleurLevel: level,
-    segments,
-    timelineNowMs: cumulativeOffsetBeforeLevel(level) + window.elapsedMs,
-    nextReviewTimelineMs: cumulativeOffsetBeforeLevel(level) + window.intervalMs,
-    retention: window.retention,
-    isOverdue: window.isOverdue,
-  };
-}
-
-export type ForgettingCurvePoint = {
-  elapsedMs: number;
-  retention: number;
-};
-
-export type RollerCoasterPoint = {
-  timelineMs: number;
-  retention: number;
-};
-
-export function sampleForgettingCurve(
-  intervalMs: number,
-  steps = 48,
-  threshold: number = REVIEW_RETENTION_THRESHOLD,
-): ForgettingCurvePoint[] {
-  const points: ForgettingCurvePoint[] = [];
-  for (let i = 0; i <= steps; i += 1) {
-    const elapsedMs = (intervalMs * i) / steps;
-    points.push({
-      elapsedMs,
-      retention: retentionAtElapsed(elapsedMs, intervalMs, threshold),
-    });
-  }
-  return points;
-}
-
-export function sampleRollerCoasterCurve(
-  timeline: RollerCoasterTimeline,
-  stepsPerSegment = 20,
-): RollerCoasterPoint[] {
-  const points: RollerCoasterPoint[] = [];
-  const { segments, timelineNowMs, isOverdue } = timeline;
-
-  for (let segmentIndex = 0; segmentIndex < segments.length; segmentIndex += 1) {
-    const segment = segments[segmentIndex];
-    const isCurrent = segmentIndex === segments.length - 1;
-    const maxElapsed = isCurrent
-      ? isOverdue
-        ? segment.intervalMs
-        : Math.max(0, Math.min(segment.intervalMs, timelineNowMs - segment.timelineStartMs))
-      : segment.intervalMs;
-
-    const steps = Math.max(2, Math.round((maxElapsed / segment.intervalMs) * stepsPerSegment));
-
-    for (let i = 0; i <= steps; i += 1) {
-      const elapsedMs = (maxElapsed * i) / steps;
-      const threshold = reviewRetentionThresholdForLevel(segment.level);
-      points.push({
-        timelineMs: segment.timelineStartMs + elapsedMs,
-        retention: retentionAtElapsed(elapsedMs, segment.intervalMs, threshold),
-      });
-    }
-
-    if (!isCurrent) {
-      const threshold = reviewRetentionThresholdForLevel(segment.level);
-      points.push({
-        timelineMs: segment.timelineEndMs,
-        retention: threshold,
-      });
-      points.push({
-        timelineMs: segment.timelineEndMs,
-        retention: 1,
-      });
-    }
-  }
-
-  return points;
 }

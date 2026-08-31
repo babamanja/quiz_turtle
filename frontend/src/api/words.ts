@@ -1,7 +1,11 @@
 import { apiClient } from "./_api";
 import type { PaginatedResponse, PaginationMeta } from "./admin";
 
-import type { VocabPairRelationType } from "@vocab-bot/shared/vocabPairRelation";
+import type {
+  ReviewCardDirection,
+  VocabAnswerMatch,
+  VocabPairRelationType,
+} from "@language-turtle/shared";
 
 export type NestMember = {
   wordId: number;
@@ -130,7 +134,8 @@ export async function lookupPrimaryWord(primaryWord: string): Promise<PrimaryWor
   return data;
 }
 
-export type ReviewCardDirection = "learning_to_primary" | "primary_to_learning";
+export type { ReviewCardDirection };
+export type ReviewMatch = VocabAnswerMatch;
 
 export type ReviewWord = {
   vocabPairId: number;
@@ -141,8 +146,6 @@ export type ReviewWord = {
   pimsleurLevel?: number;
   nextReviewMs?: number;
 };
-
-export type ReviewMatch = "exact" | "close" | "wrong";
 
 export type ReviewResult = {
   direction?: ReviewCardDirection;

@@ -1,5 +1,4 @@
 import type { PrismaClient } from "@prisma/client";
-import { toBigInt } from "./telegram-ids";
 
 export type TelegramProfile = {
   id: number;
@@ -39,7 +38,7 @@ export async function ensureUserByTelegram(
   prisma: PrismaClient,
   profile: TelegramProfile,
 ): Promise<{ userId: number; isNew: boolean }> {
-  const telegramId = toBigInt(profile.id);
+  const telegramId = BigInt(profile.id);
   const existing = await prisma.user.findFirst({
     where: { telegramId, deletedAt: null },
     select: { id: true },
@@ -70,7 +69,7 @@ export async function getUserIdByTelegram(
   telegramUserId: number,
 ): Promise<number | null> {
   const row = await prisma.user.findFirst({
-    where: { telegramId: toBigInt(telegramUserId), deletedAt: null },
+    where: { telegramId: BigInt(telegramUserId), deletedAt: null },
     select: { id: true },
   });
   return row?.id ?? null;
@@ -116,56 +115,4 @@ export async function getUserLanguages(
     primaryLangId: user?.primaryLanguageId ?? null,
     learningLangId: user?.learningLanguageId ?? null,
   };
-}
-
-export async function linkTelegramByCode(
-  prisma: PrismaClient,
-  profile: TelegramProfile,
-  code: string,
-): Promise<{ ok: true; userId: number } | { ok: false; error: string }> {
-  const normalized = code.trim();
-  if (!normalized) {
-    return { ok: false, error: "empty code" };
-  }
-
-  const link = await prisma.telegramLinkCode.findFirst({
-    where: {
-      code: normalized,
-      usedAt: null,
-      expiresAt: { gt: new Date() },
-    },
-  });
-  if (!link) {
-    return { ok: false, error: "invalid or expired code" };
-  }
-
-  const telegramId = toBigInt(profile.id);
-  const conflict = await prisma.user.findFirst({
-    where: {
-      telegramId,
-      deletedAt: null,
-      NOT: { id: link.userId },
-    },
-    select: { id: true },
-  });
-  if (conflict) {
-    return { ok: false, error: "telegram already linked to another account" };
-  }
-
-  await prisma.$transaction(async (tx: PrismaClient) => {
-    await tx.user.update({
-      where: { id: link.userId },
-      data: {
-        telegramId,
-        telegramUsername: profile.username ?? null,
-        userName: buildTelegramUserName(profile),
-      },
-    });
-    await tx.telegramLinkCode.update({
-      where: { id: link.id },
-      data: { usedAt: new Date() },
-    });
-  });
-
-  return { ok: true, userId: link.userId };
 }

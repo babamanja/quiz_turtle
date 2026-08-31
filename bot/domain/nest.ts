@@ -3,7 +3,7 @@ import {
   collectNestAlternateTexts,
   mergeVocabAlternateAnswers,
   type NestMember,
-} from '@vocab-bot/shared/vocabNest';
+} from '@language-turtle/shared';
 
 export async function ensureVocabWordWithNest(
   prisma: PrismaClient,

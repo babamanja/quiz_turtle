@@ -1,4 +1,3 @@
-import { PART_OF_SPEECH_VALUES } from "@vocab-bot/shared/partOfSpeech";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +13,7 @@ import {
   removeAdminVocabWordNestMember,
   updateAdminVocabWord,
 } from "../../api/admin";
+import PartOfSpeechSelect from "../../components/PartOfSpeechSelect";
 import Button from "../../components/UI/Button/Button";
 import ButtonLink from "../../components/UI/Button/ButtonLink";
 import Page from "../../components/UI/Page";
@@ -326,21 +326,13 @@ export default function AdminWordDetailPage() {
             <label className="add-word-modal__hint" htmlFor="admin-word-detail-pos">
               {t("table.words.partOfSpeech")}
             </label>
-            <select
+            <PartOfSpeechSelect
               id="admin-word-detail-pos"
               className="text-input"
-              style={{ marginBottom: 0 }}
               value={partOfSpeech}
               disabled={isSaving || !metadataEditable}
-              onChange={(event) => setPartOfSpeech(event.target.value)}
-            >
-              <option value="">{t("wordDetailPage.partOfSpeechUnset")}</option>
-              {PART_OF_SPEECH_VALUES.map((value) => (
-                <option key={value} value={value}>
-                  {t(`partOfSpeech.${value}`)}
-                </option>
-              ))}
-            </select>
+              onChange={setPartOfSpeech}
+            />
 
             <p className="add-word-modal__hint">{t("table.adminTranslations.tags")}</p>
             {!metadataEditable ? (

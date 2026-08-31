@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PREMIUM_USD_MONTHLY, PREMIUM_USD_YEARLY } from "@language-turtle/shared";
+
 import { createRequestId, trackAnalyticsEvent, trackUiCtaClick } from "../../analytics";
 import {
   cancelMySubscription,
@@ -14,7 +16,6 @@ import Card from "../../components/UI/Card";
 import Page from "../../components/UI/Page";
 import PageHeader from "../../components/UI/PageHeader";
 import "../style.scss";
-import { formatUsd, PREMIUM_USD_MONTHLY, PREMIUM_USD_YEARLY } from "../../config/pricing";
 import { formatRelativeTime } from "../../utils/convertTime";
 
 export default function MySubscriptionPage() {
@@ -152,7 +153,6 @@ export default function MySubscriptionPage() {
 
       <section className="subscription-page__plans">
         <Card
-          as="article"
           className={`subscription-page__plan-card ${
             !isPremiumPlan ? "subscription-page__plan-card--current" : ""
           }`}
@@ -160,7 +160,7 @@ export default function MySubscriptionPage() {
           <h2>{t("mySubscription.plans.basic.title")}</h2>
           <p className="subscription-page__plan-price">{t("mySubscription.plans.basic.price")}</p>
           <ul className="subscription-page__benefits">
-            <li>{t("mySubscription.plans.basic.benefits.vocabBot")}</li>
+            <li>{t("mySubscription.plans.basic.benefits.telegramPractice")}</li>
             <li>{t("mySubscription.plans.basic.benefits.telegramAccess")}</li>
             <li>{t("mySubscription.plans.basic.benefits.communitySupport")}</li>
           </ul>
@@ -172,7 +172,6 @@ export default function MySubscriptionPage() {
         </Card>
 
         <Card
-          as="article"
           className={`subscription-page__plan-card ${
             isPremiumPlan ? "subscription-page__plan-card--current" : ""
           }`}
@@ -216,10 +215,14 @@ export default function MySubscriptionPage() {
           <p className="subscription-page__plan-price">
             {premiumBillingPeriod === "monthly"
               ? t("mySubscription.plans.premium.priceMonthly", {
-                  price: formatUsd(PREMIUM_USD_MONTHLY),
+                  price: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                    PREMIUM_USD_MONTHLY,
+                  ),
                 })
               : t("mySubscription.plans.premium.priceYearly", {
-                  price: formatUsd(PREMIUM_USD_YEARLY),
+                  price: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                    PREMIUM_USD_YEARLY,
+                  ),
                 })}
           </p>
           <ul className="subscription-page__benefits">

@@ -2,26 +2,14 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react
 
 import { useTranslation } from "react-i18next";
 
-import { PART_OF_SPEECH_VALUES } from "@vocab-bot/shared/partOfSpeech";
-
-
-
 import {
-
   type AdminLanguage,
-
   type AdminTag,
-
   type AdminTranslation,
-
   createAdminTranslationRows,
-
   deleteAdminTranslation,
-
   getAdminLanguages,
-
   getAdminTags,
-
   getAdminTranslation,
 
   getAdminTranslations,
@@ -32,6 +20,7 @@ import {
 
 } from "../../api/admin";
 
+import PartOfSpeechSelect from "../../components/PartOfSpeechSelect";
 import Button from "../../components/UI/Button/Button";
 
 import Modal from "../../components/UI/Modal";
@@ -1121,20 +1110,12 @@ export default function AdminTranslationsPage() {
               <label className="add-word-modal__hint" htmlFor="admin-translation-pos">
                 {t("wordDetailPage.partOfSpeech")}
               </label>
-              <select
+              <PartOfSpeechSelect
                 id="admin-translation-pos"
-                className="text-input"
                 value={partOfSpeech}
                 disabled={isSubmitting || isFormLoading}
-                onChange={(event) => setPartOfSpeech(event.target.value)}
-              >
-                <option value="">{t("wordDetailPage.partOfSpeechUnset")}</option>
-                {PART_OF_SPEECH_VALUES.map((pos) => (
-                  <option key={pos} value={pos}>
-                    {t(`partOfSpeech.${pos}`)}
-                  </option>
-                ))}
-              </select>
+                onChange={setPartOfSpeech}
+              />
             </div>
           ) : null}
 

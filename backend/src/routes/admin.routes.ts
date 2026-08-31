@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import * as adminController from "../controllers/admin.controller.js";
+import * as feedbackController from "../controllers/feedback.controller.js";
+import * as qualificationController from "../controllers/qualification.controller.js";
+import * as storyController from "../controllers/story.controller.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
@@ -15,16 +18,16 @@ router.post(
 router.get("/payments", asyncHandler(adminController.listPayments));
 router.post("/payments/:paymentId/refund", asyncHandler(adminController.refundPayment));
 router.get("/ai-usage", asyncHandler(adminController.getAiUsage));
-router.get("/qualification-template", asyncHandler(adminController.getQualificationTemplate));
+router.get("/qualification-template", asyncHandler(qualificationController.getQualificationTemplate));
 router.put(
   "/qualification-template",
-  asyncHandler(adminController.updateQualificationTemplate),
+  asyncHandler(qualificationController.updateQualificationTemplate),
 );
 router.get(
   "/qualification-submissions",
-  asyncHandler(adminController.listQualificationSubmissions),
+  asyncHandler(qualificationController.listQualificationSubmissions),
 );
-router.get("/feedback", asyncHandler(adminController.listFeedback));
+router.get("/feedback", asyncHandler(feedbackController.listFeedbackForAdmin));
 router.get("/user-pairs", asyncHandler(adminController.listUserPairs));
 router.get("/words", asyncHandler(adminController.listVocabWords));
 router.post("/words", asyncHandler(adminController.createVocabWord));
@@ -50,5 +53,14 @@ router.get("/languages", asyncHandler(adminController.listLanguages));
 router.post("/languages", asyncHandler(adminController.createLanguage));
 router.patch("/languages/:languageId", asyncHandler(adminController.updateLanguage));
 router.delete("/languages/:languageId", asyncHandler(adminController.deleteLanguage));
+router.get("/stories", asyncHandler(storyController.listAdminStories));
+router.post("/stories", asyncHandler(storyController.createAdminStory));
+router.get("/stories/:storyId", asyncHandler(storyController.getAdminStory));
+router.patch("/stories/:storyId", asyncHandler(storyController.updateAdminStory));
+router.delete("/stories/:storyId", asyncHandler(storyController.deleteAdminStory));
+router.put(
+  "/stories/:storyId/content",
+  asyncHandler(storyController.replaceAdminStoryContent),
+);
 
 export default router;

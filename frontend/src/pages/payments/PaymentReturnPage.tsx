@@ -249,7 +249,7 @@ export default function PaymentReturnPage() {
     return (
       <Page width="full" className="subscription-page payment-result-page">
         <PageHeader title={pageTitle} />
-        <Card as="article" className="payment-result">
+        <Card className="payment-result">
           <p className="payment-result__loading">
             {statusMessage ?? t("billing.checkoutLoading")}
           </p>
@@ -285,7 +285,7 @@ export default function PaymentReturnPage() {
   return (
     <Page width="full" className="subscription-page payment-result-page">
       <PageHeader title={pageTitle} />
-      <Card as="article" className="payment-result">
+      <Card className="payment-result">
         <p className="payment-result__loading">{t("billing.checkoutLoading")}</p>
       </Card>
     </Page>

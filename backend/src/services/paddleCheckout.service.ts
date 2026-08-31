@@ -6,7 +6,6 @@ import {
 import * as paymentRepository from "../db/paymentRepository.js";
 import * as subscriptionRepository from "../db/subscriptionRepository.js";
 import {
-  buildCheckoutUrl,
   buildPaymentReturnUrl,
   getRequiredEnv,
   normalizeAppBaseUrl,
@@ -28,8 +27,6 @@ export type CheckoutSession = {
   checkoutUrl: string;
 };
 
-export type CheckoutType = "subscription";
-
 type PaddleCheckoutResponse = {
   data?: {
     id?: string;
@@ -48,7 +45,6 @@ async function createPaddleCheckout(input: {
 }): Promise<{ checkoutUrl: string; providerTransactionId: string | null }> {
   const apiKey = getRequiredEnv("PADDLE_API_KEY");
   const priceId = getPaddlePriceId({
-    checkoutType: "subscription",
     planCode: input.planCode,
     billingPeriod: input.billingPeriod,
   });
@@ -144,7 +140,7 @@ export async function createCheckoutSession(
     },
   });
 
-  let checkoutUrl = buildCheckoutUrl(appBaseUrl, payment.id);
+  let checkoutUrl = buildPaymentReturnUrl(appBaseUrl, payment.id);
   let providerTransactionId: string | null = null;
   const paddleCheckout = await createPaddleCheckout({
     paymentId: payment.id,

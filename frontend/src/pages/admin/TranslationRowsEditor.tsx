@@ -1,8 +1,7 @@
 import { useTranslation } from "react-i18next";
 
-import { PART_OF_SPEECH_VALUES } from "@vocab-bot/shared/partOfSpeech";
-
 import type { AdminTag, AdminTranslationRowInput } from "../../api/admin";
+import PartOfSpeechSelect from "../../components/PartOfSpeechSelect";
 import Button from "../../components/UI/Button/Button";
 import TagTreePicker from "./TagTreePicker";
 import { toggleTagSelection, type TagTreeNode } from "./tagTree";
@@ -138,20 +137,13 @@ export default function TranslationRowsEditor({
                   />
                 </td>
                 <td>
-                  <select
+                  <PartOfSpeechSelect
                     className="text-input translation-rows-editor__pos"
                     value={row.partOfSpeech}
                     disabled={disabled}
-                    onChange={(event) => updateRow(row.id, { partOfSpeech: event.target.value })}
+                    onChange={(partOfSpeech) => updateRow(row.id, { partOfSpeech })}
                     aria-label={t("admin.translationsRowPartOfSpeechAria", { n: index + 1 })}
-                  >
-                    <option value="">{t("wordDetailPage.partOfSpeechUnset")}</option>
-                    {PART_OF_SPEECH_VALUES.map((pos) => (
-                      <option key={pos} value={pos}>
-                        {t(`partOfSpeech.${pos}`)}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </td>
                 <td>
                   {tagTree.length === 0 ? (

@@ -1,34 +1,13 @@
 import type { Request, Response } from "express";
 
 import { getRouteParam } from "../utils/routeParams.js";
+import { normalizeAppBaseUrl } from "../services/paymentMetadata.js";
 import * as subscriptionService from "../services/subscription.service.js";
 import {
   getRequiredUserId,
   sendServiceFailure,
   sendUnauthorized,
 } from "./helpers.js";
-
-function normalizeAppBaseUrl(value: string): string {
-  const fallback = "http://127.0.0.1:5173";
-  const raw = value.trim();
-  if (!raw) {
-    return fallback;
-  }
-
-  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
-  try {
-    const parsed = new URL(withProtocol);
-    const isLocalhost = parsed.hostname === "localhost";
-    const isLoopback = parsed.hostname === "127.0.0.1";
-    if (isLocalhost || isLoopback) {
-      const port = parsed.port || "5173";
-      return `http://127.0.0.1:${port}`;
-    }
-    return parsed.origin;
-  } catch {
-    return fallback;
-  }
-}
 
 function getAppBaseUrl(req: Request): string {
   const origin =
@@ -93,10 +72,6 @@ export async function createMyCheckoutSession(req: Request, res: Response) {
   const planCode = req.body?.planCode;
   if (planCode !== "basic" && planCode !== "premium") {
     return res.status(400).json({ error: "invalid planCode" });
-  }
-  const checkoutType = req.body?.checkoutType;
-  if (checkoutType !== undefined && checkoutType !== "subscription") {
-    return res.status(400).json({ error: "invalid checkoutType" });
   }
   const billingPeriod = req.body?.billingPeriod;
   if (

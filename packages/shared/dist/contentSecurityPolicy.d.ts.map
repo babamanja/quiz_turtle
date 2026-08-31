@@ -1,1 +1,1 @@
-{"version":3,"file":"contentSecurityPolicy.d.ts","sourceRoot":"","sources":["../src/contentSecurityPolicy.ts"],"names":[],"mappings":"AAAA,mDAAmD;AACnD,eAAO,MAAM,2BAA2B,gEACuB,CAAC;AAEhE;;;GAGG;AACH,wBAAgB,6BAA6B,IAAI,MAAM,CAiDtD"}
+{"version":3,"file":"contentSecurityPolicy.d.ts","sourceRoot":"","sources":["../src/contentSecurityPolicy.ts"],"names":[],"mappings":"AAAA;;;GAGG;AACH,wBAAgB,6BAA6B,IAAI,MAAM,CAiDtD"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"vocabInflection.d.ts","sourceRoot":"","sources":["../src/vocabInflection.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,cAAc,GAAG;IAC3B,MAAM,EAAE,MAAM,CAAC;IACf,IAAI,EAAE,MAAM,CAAC;CACd,CAAC;AAEF,sGAAsG;AACtG,wBAAgB,0BAA0B,CACxC,gBAAgB,EAAE,SAAS,MAAM,EAAE,EACnC,eAAe,EAAE,SAAS,MAAM,EAAE,GACjC,MAAM,EAAE,CAkBV"}

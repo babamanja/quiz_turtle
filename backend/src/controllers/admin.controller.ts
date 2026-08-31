@@ -6,8 +6,6 @@ import * as languageService from "../services/language.service.js";
 import * as tagService from "../services/tag.service.js";
 import * as translationService from "../services/translation.service.js";
 import * as vocabWordService from "../services/vocabWord.service.js";
-import * as feedbackController from "./feedback.controller.js";
-import * as qualificationController from "./qualification.controller.js";
 import {
   getRequiredUserId,
   sendServiceFailure,
@@ -165,22 +163,6 @@ export async function getAiUsage(req: Request, res: Response) {
     search: req.query?.search,
   });
   return res.status(200).json(result.usage);
-}
-
-export async function getQualificationTemplate(req: Request, res: Response) {
-  return qualificationController.getQualificationTemplate(req, res);
-}
-
-export async function updateQualificationTemplate(req: Request, res: Response) {
-  return qualificationController.updateQualificationTemplate(req, res);
-}
-
-export async function listQualificationSubmissions(req: Request, res: Response) {
-  return qualificationController.listQualificationSubmissions(req, res);
-}
-
-export async function listFeedback(req: Request, res: Response) {
-  return feedbackController.listFeedbackForAdmin(req, res);
 }
 
 export async function listUserPairs(req: Request, res: Response) {

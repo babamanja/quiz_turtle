@@ -1,5 +1,13 @@
 import type { PrismaClient } from '@prisma/client';
-import { resolvePairSidesForUser } from '@vocab-bot/shared/vocabPairRelation';
+import {
+  canonicalWordPairIds,
+  entryToPairSchedules,
+  initialDictionarySchedules,
+  planReviewScheduleUpdate,
+  resolvePairSidesForUser,
+  selectWorstCardDirection,
+  type ReviewCardDirection,
+} from '@language-turtle/shared';
 import {
   ensureVocabWordWithNest,
   mergeVocabAlternateAnswers,
@@ -7,17 +15,11 @@ import {
   selectNestMembersForWordIds,
 } from './nest';
 import {
-  entryToPairSchedules,
-  selectWorstCardDirection,
-  type ReviewCardDirection,
-} from '@vocab-bot/shared/vocabReviewCard';
-import {
   attachPairToUserDefaultDictionary,
   selectDefaultDictionaryEntry,
   selectDefaultDictionaryIdForUser,
 } from './dictionary';
-import { initialSchedule, scheduleAfterCorrect, scheduleAfterWrong } from './pimsleur-schedule';
-import { toBigInt } from './telegram-ids';
+import { upsertSkillAfterReview } from './skill-state';
 import { getUserIdByTelegram, getUserLanguages } from './telegram-user';
 
 export type DueVocabPair = {
@@ -116,6 +118,7 @@ export async function findExistingPairsForPrimaryWord(
 ): Promise<Array<{ pairId: number; learningText: string }>> {
   const pairs = await prisma.vocabPair.findMany({
     where: {
+      relationType: 'translation',
       OR: [
         { wordAId: primaryWordId, wordB: { languageId: learningLangId } },
         { wordBId: primaryWordId, wordA: { languageId: learningLangId } },
@@ -143,13 +146,12 @@ export async function attachUserToVocabPair(
   nowMs: number = Date.now(),
 ): Promise<void> {
   const userId = await requireInternalUserId(prisma, telegramUserId);
-  const s = initialSchedule(nowMs);
-  await attachPairToUserDefaultDictionary(prisma, userId, pairId, {
-    pimsleurLevel: s.pimsleurLevel,
-    nextReviewMs: s.nextReviewMs,
-    pimsleurLevelReverse: s.pimsleurLevel,
-    nextReviewMsReverse: s.nextReviewMs,
-  });
+  await attachPairToUserDefaultDictionary(
+    prisma,
+    userId,
+    pairId,
+    initialDictionarySchedules(nowMs),
+  );
 }
 
 async function findOrCreateTranslationPair(
@@ -157,8 +159,7 @@ async function findOrCreateTranslationPair(
   wordIdOne: number,
   wordIdTwo: number,
 ) {
-  const wordAId = Math.min(wordIdOne, wordIdTwo);
-  const wordBId = Math.max(wordIdOne, wordIdTwo);
+  const { wordAId, wordBId } = canonicalWordPairIds(wordIdOne, wordIdTwo);
   let pair = await prisma.vocabPair.findUnique({
     where: {
       wordAId_wordBId_relationType: { wordAId, wordBId, relationType: 'translation' },
@@ -185,41 +186,12 @@ export async function createPairFromPrimaryWordAndLearningText(
 
   const pair = await findOrCreateTranslationPair(prisma, primaryWordId, learningWordId);
 
-  const s = initialSchedule(nowMs);
-  await attachPairToUserDefaultDictionary(prisma, userId, pair.id, {
-    pimsleurLevel: s.pimsleurLevel,
-    nextReviewMs: s.nextReviewMs,
-    pimsleurLevelReverse: s.pimsleurLevel,
-    nextReviewMsReverse: s.nextReviewMs,
-  });
-
-  return pair.id;
-}
-
-export async function addWordPair(
-  prisma: PrismaClient,
-  telegramUserId: number,
-  promptWord: string,
-  answerWord: string,
-  nowMs: number,
-): Promise<number> {
-  const { userId, primaryLangId, learningLangId } = await requireUserLanguages(
+  await attachPairToUserDefaultDictionary(
     prisma,
-    telegramUserId,
+    userId,
+    pair.id,
+    initialDictionarySchedules(nowMs),
   );
-
-  const primaryWordId = await upsertVocabWord(prisma, primaryLangId, promptWord);
-  const learningWordId = await upsertVocabWord(prisma, learningLangId, answerWord);
-
-  const pair = await findOrCreateTranslationPair(prisma, primaryWordId, learningWordId);
-
-  const s = initialSchedule(nowMs);
-  await attachPairToUserDefaultDictionary(prisma, userId, pair.id, {
-    pimsleurLevel: s.pimsleurLevel,
-    nextReviewMs: s.nextReviewMs,
-    pimsleurLevelReverse: s.pimsleurLevel,
-    nextReviewMsReverse: s.nextReviewMs,
-  });
 
   return pair.id;
 }
@@ -243,7 +215,7 @@ export async function getRandomDueWordsForUser(
   const dueRows = await prisma.dictionaryEntry.findMany({
     where: {
       dictionaryId,
-      OR: [{ nextReviewMs: { lte: toBigInt(nowMs) } }, { nextReviewMsReverse: { lte: toBigInt(nowMs) } }],
+      OR: [{ nextReviewMs: { lte: BigInt(nowMs) } }, { nextReviewMsReverse: { lte: BigInt(nowMs) } }],
     },
     include: {
       vocabPair: {
@@ -318,51 +290,6 @@ export async function getRandomDueWordsForUser(
   return out;
 }
 
-export async function getRandomDueWordForUser(
-  prisma: PrismaClient,
-  telegramUserId: number,
-  nowMs: number,
-): Promise<DueVocabPair | null> {
-  const words = await getRandomDueWordsForUser(prisma, telegramUserId, nowMs, 1);
-  return words[0] ?? null;
-}
-
-export async function setUserLanguages(
-  prisma: PrismaClient,
-  telegramUserId: number,
-  primaryLangId: number,
-  learningLangId: number,
-): Promise<void> {
-  const userId = await requireInternalUserId(prisma, telegramUserId);
-
-  await prisma.$transaction(async (tx: PrismaClient) => {
-    await tx.language.upsert({
-      where: { id: primaryLangId },
-      update: {},
-      create: { id: primaryLangId, name: `lang_${primaryLangId}` },
-    });
-
-    await tx.language.upsert({
-      where: { id: learningLangId },
-      update: {},
-      create: { id: learningLangId, name: `lang_${learningLangId}` },
-    });
-
-    await tx.user.update({
-      where: { id: userId },
-      data: { primaryLanguageId: primaryLangId, learningLanguageId: learningLangId },
-    });
-  });
-}
-
-export async function addLanguageById(prisma: PrismaClient, langId: number): Promise<void> {
-  await prisma.language.upsert({
-    where: { id: langId },
-    update: {},
-    create: { id: langId, name: `lang_${langId}` },
-  });
-}
-
 export async function addLanguageByName(prisma: PrismaClient, langName: string): Promise<number> {
   const lang = await prisma.language.upsert({
     where: { name: langName },
@@ -370,32 +297,6 @@ export async function addLanguageByName(prisma: PrismaClient, langName: string):
     create: { name: langName },
   });
   return lang.id;
-}
-
-export async function setUserLangsStrict(
-  prisma: PrismaClient,
-  telegramUserId: number,
-  primaryLangId: number,
-  learningLangId: number,
-): Promise<void> {
-  const userId = await requireInternalUserId(prisma, telegramUserId);
-
-  const [primaryLang, learningLang] = await Promise.all([
-    prisma.language.findUnique({ where: { id: primaryLangId } }),
-    prisma.language.findUnique({ where: { id: learningLangId } }),
-  ]);
-
-  const missing: number[] = [];
-  if (!primaryLang) missing.push(primaryLangId);
-  if (!learningLang) missing.push(learningLangId);
-  if (missing.length > 0) {
-    throw new LanguageNotFoundError(missing);
-  }
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: { primaryLanguageId: primaryLangId, learningLanguageId: learningLangId },
-  });
 }
 
 export async function getAllLanguages(
@@ -472,26 +373,12 @@ export async function applyReviewResult(
     throw new Error(`Dictionary entry not found: user=${telegramUserId} pair=${pairId}`);
   }
 
-  const schedules = entryToPairSchedules(entry);
-  const worstDirection = selectWorstCardDirection(schedules);
-  const cardDirection = direction === worstDirection ? direction : worstDirection;
-  const currentLevel =
-    cardDirection === 'learning_to_primary'
-      ? schedules.learningToPrimary.pimsleurLevel
-      : schedules.primaryToLearning.pimsleurLevel;
-  const sch =
-    result === 'know' ? scheduleAfterCorrect(currentLevel, nowMs) : scheduleAfterWrong(nowMs);
-
-  const updateData =
-    cardDirection === 'learning_to_primary'
-      ? {
-          pimsleurLevel: sch.pimsleurLevel,
-          nextReviewMs: sch.nextReviewMs,
-        }
-      : {
-          pimsleurLevelReverse: sch.pimsleurLevel,
-          nextReviewMsReverse: sch.nextReviewMs,
-        };
+  const { direction: resolvedDirection, schedule, updateData } = planReviewScheduleUpdate(
+    entry,
+    result,
+    nowMs,
+    direction,
+  );
 
   await prisma.dictionaryEntry.update({
     where: {
@@ -502,6 +389,8 @@ export async function applyReviewResult(
     },
     data: updateData,
   });
+
+  await upsertSkillAfterReview(prisma, userId, pairId, resolvedDirection, schedule, result);
 
   const resolved = resolvePairSidesForUser(
     entry.vocabPair.wordA,

@@ -13,9 +13,9 @@ function run(label, args) {
   }
 }
 
-run("shared", ["run", "build", "-w", "@vocab-bot/shared"]);
-run("backend", ["run", "build", "-w", "vocab-bot-backend"]);
-run("frontend", ["run", "build", "-w", "vocab-bot-frontend"]);
+run("shared", ["run", "build", "-w", "@language-turtle/shared"]);
+run("backend", ["run", "build", "-w", "language-turtle-backend"]);
+run("frontend", ["run", "build", "-w", "language-turtle-frontend"]);
 
 const indexHtml = join(process.cwd(), "frontend", "dist", "index.html");
 if (!existsSync(indexHtml)) {
@@ -25,4 +25,4 @@ if (!existsSync(indexHtml)) {
 console.log("[vercel-build] OK: frontend/dist/index.html");
 
 // Run last so a migration failure does not block the static bundle above.
-run("db:deploy", ["run", "db:deploy", "-w", "vocab-bot-backend"]);
+run("db:deploy", ["run", "db:deploy", "-w", "language-turtle-backend"]);

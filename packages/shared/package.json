@@ -1,5 +1,5 @@
 {
-  "name": "@vocab-bot/shared",
+  "name": "@language-turtle/shared",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,62 +7,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./uploadLimits": {
-      "types": "./dist/uploadLimits.d.ts",
-      "import": "./dist/uploadLimits.js"
-    },
-    "./pdfOcrLimits": {
-      "types": "./dist/pdfOcrLimits.d.ts",
-      "import": "./dist/pdfOcrLimits.js"
-    },
-    "./pricing": {
-      "types": "./dist/pricing.d.ts",
-      "import": "./dist/pricing.js"
-    },
-    "./quizLanguages": {
-      "types": "./dist/quizLanguages.d.ts",
-      "import": "./dist/quizLanguages.js"
-    },
-    "./generationUploadProfile": {
-      "types": "./dist/generationUploadProfile.d.ts",
-      "import": "./dist/generationUploadProfile.js"
-    },
-    "./contentSecurityPolicy": {
-      "types": "./dist/contentSecurityPolicy.d.ts",
-      "import": "./dist/contentSecurityPolicy.js"
-    },
-    "./vocabPair": {
-      "types": "./dist/vocabPair.d.ts",
-      "import": "./dist/vocabPair.js"
-    },
-    "./vocabPairRelation": {
-      "types": "./dist/vocabPairRelation.d.ts",
-      "import": "./dist/vocabPairRelation.js"
-    },
-    "./vocabNest": {
-      "types": "./dist/vocabNest.d.ts",
-      "import": "./dist/vocabNest.js"
-    },
-    "./vocabReviewAnswer": {
-      "types": "./dist/vocabReviewAnswer.d.ts",
-      "import": "./dist/vocabReviewAnswer.js"
-    },
-    "./vocabReviewCard": {
-      "types": "./dist/vocabReviewCard.d.ts",
-      "import": "./dist/vocabReviewCard.js"
-    },
-    "./partOfSpeech": {
-      "types": "./dist/partOfSpeech.d.ts",
-      "import": "./dist/partOfSpeech.js"
-    },
-    "./pimsleurSchedule": {
-      "types": "./dist/pimsleurSchedule.d.ts",
-      "import": "./dist/pimsleurSchedule.js"
-    },
-    "./forgettingCurve": {
-      "types": "./dist/forgettingCurve.d.ts",
-      "import": "./dist/forgettingCurve.js"
     }
   },
   "scripts": {

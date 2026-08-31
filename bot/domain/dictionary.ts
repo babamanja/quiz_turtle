@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import { upsertInitialSkillsFromEntrySchedule } from "./skill-state";
 
 const DEFAULT_DICTIONARY_NAME = "My dictionary";
 
@@ -63,34 +64,7 @@ export async function attachPairToUserDefaultDictionary(
     ],
     skipDuplicates: true,
   });
-}
-
-export async function attachPairsToUserDefaultDictionary(
-  prisma: PrismaClient,
-  userId: number,
-  pairIds: number[],
-  schedule: {
-    pimsleurLevel: number;
-    nextReviewMs: bigint;
-    pimsleurLevelReverse: number;
-    nextReviewMsReverse: bigint;
-  },
-): Promise<void> {
-  if (pairIds.length === 0) {
-    return;
-  }
-  const dictionaryId = await ensureDefaultDictionaryForUser(prisma, userId);
-  await prisma.dictionaryEntry.createMany({
-    data: pairIds.map((vocabPairId) => ({
-      dictionaryId,
-      vocabPairId,
-      pimsleurLevel: schedule.pimsleurLevel,
-      nextReviewMs: schedule.nextReviewMs,
-      pimsleurLevelReverse: schedule.pimsleurLevelReverse,
-      nextReviewMsReverse: schedule.nextReviewMsReverse,
-    })),
-    skipDuplicates: true,
-  });
+  await upsertInitialSkillsFromEntrySchedule(prisma, userId, vocabPairId, schedule);
 }
 
 export async function selectDefaultDictionaryEntry(

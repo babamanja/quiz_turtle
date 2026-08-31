@@ -1,68 +1,101 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-
 import { refreshSession } from "./refreshSessionApi";
 import { clearStoredSession, getStoredAuthToken, setStoredSession } from "../userStorage";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
-export const apiClient = axios.create({
-  baseURL: `${API_BASE}/api`,
-  headers: { "Content-Type": "application/json" },
-  withCredentials: true,
-});
+export class ApiError extends Error {
+  status?: number;
+  data?: unknown;
 
-apiClient.interceptors.request.use((config) => {
-  const token = getStoredAuthToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  constructor(message: string, status?: number, data?: unknown) {
+    super(message);
+    this.status = status;
+    this.data = data;
   }
-  return config;
-});
-
-type RetryableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
-
-function isAuthRouteNoRefresh(url: string | undefined): boolean {
-  if (!url) {
-    return false;
-  }
-  return (
-    url.includes("/auth/login") ||
-    url.includes("/auth/signup") ||
-    url.includes("/auth/password")
-  );
 }
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError<{ error?: string }>) => {
-    const originalRequest = error.config as RetryableConfig | undefined;
-    const status = error.response?.status;
+type RequestOptions = {
+  method?: string;
+  body?: unknown;
+  params?: Record<string, string | number | boolean | undefined | null>;
+  retry?: boolean;
+};
 
-    if (
-      status === 401 &&
-      originalRequest &&
-      !originalRequest._retry &&
-      !isAuthRouteNoRefresh(originalRequest.url) &&
-      typeof originalRequest.headers?.Authorization === "string" &&
-      originalRequest.headers.Authorization.startsWith("Bearer ")
-    ) {
-      originalRequest._retry = true;
-      try {
-        const session = await refreshSession();
-        setStoredSession({ user: session.user, token: session.token });
-        originalRequest.headers.Authorization = `Bearer ${session.token}`;
-        return apiClient(originalRequest);
-      } catch {
-        clearStoredSession();
+function buildUrl(path: string, params?: RequestOptions["params"]): string {
+  const qs = new URLSearchParams();
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== "") {
+        qs.set(key, String(value));
       }
     }
+  }
+  const query = qs.toString();
+  return `${API_BASE}/api${path}${query ? `?${query}` : ""}`;
+}
 
-    const msg = error.response?.data?.error;
-    if (typeof msg === "string" && msg.length > 0) {
-      return Promise.reject(new Error(msg));
+async function parseError(response: Response): Promise<ApiError> {
+  const data = await response.json().catch(() => null);
+  const message =
+    data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
+      ? (data as { error: string }).error
+      : `HTTP ${response.status}`;
+  return new ApiError(message, response.status, data);
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = getStoredAuthToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(buildUrl(path, options.params), {
+    method: options.method ?? "GET",
+    credentials: "include",
+    headers,
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+  });
+
+  const skipRefresh =
+    path.includes("/auth/login") || path.includes("/auth/signup") || path.includes("/auth/password");
+
+  if (response.status === 401 && options.retry !== false && !skipRefresh && token) {
+    try {
+      const session = await refreshSession();
+      setStoredSession({ user: session.user, token: session.token });
+      return request<T>(path, { ...options, retry: false });
+    } catch {
+      clearStoredSession();
     }
-    return Promise.reject(new Error(status != null ? `HTTP ${status}` : error.message));
-  },
-);
+  }
+
+  if (!response.ok) {
+    throw await parseError(response);
+  }
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
+export const apiClient = {
+  get: async <T>(path: string, config?: { params?: RequestOptions["params"] }) => ({
+    data: await request<T>(path, { method: "GET", params: config?.params }),
+  }),
+  post: async <T>(path: string, body?: unknown) => ({
+    data: await request<T>(path, { method: "POST", body }),
+  }),
+  patch: async <T>(path: string, body?: unknown) => ({
+    data: await request<T>(path, { method: "PATCH", body }),
+  }),
+  put: async <T>(path: string, body?: unknown) => ({
+    data: await request<T>(path, { method: "PUT", body }),
+  }),
+  delete: async <T>(path: string, body?: unknown) => ({
+    data: await request<T>(path, { method: "DELETE", body }),
+  }),
+};
 
 export default apiClient;

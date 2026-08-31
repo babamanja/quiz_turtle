@@ -6,7 +6,7 @@ import {
   entryToPairSchedules,
   scheduleForDirection,
   selectWorstCardDirection,
-} from "@vocab-bot/shared/vocabReviewCard";
+} from "@language-turtle/shared";
 
 import { getMyWord, type NestMemberView, type UserWordDetail } from "../../api/words";
 import ButtonLink from "../../components/UI/Button/ButtonLink";

@@ -1,10 +1,10 @@
 {
-  "name": "vocab-bot-frontend",
+  "name": "language-turtle-frontend",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build -w @vocab-bot/shared && vite build --mode prod",
+    "build": "npm run build -w @language-turtle/shared && vite build --mode prod",
     "build:local": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -16,14 +16,9 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,scss,json,md}\""
   },
   "dependencies": {
-    "@vocab-bot/shared": "*",
-    "@fortawesome/fontawesome-svg-core": "^6.7.2",
-    "@fortawesome/free-solid-svg-icons": "^6.7.2",
-    "@fortawesome/react-fontawesome": "^3.3.0",
     "@paddle/paddle-js": "^1.6.4",
-    "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "axios": "^1.7.9",
+    "@language-turtle/shared": "*",
     "i18next": "^26.0.3",
     "posthog-js": "^1.372.9",
     "react": "^19.0.0",
@@ -46,13 +41,13 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.0.0",
+    "jsdom": "^26.1.0",
     "prettier": "^3.3.3",
     "sass": "^1.98.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.0.0",
     "vite": "^6.0.0",
-    "vitest": "^3.2.4",
-    "jsdom": "^26.1.0"
+    "vitest": "^3.2.4"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.60.1"

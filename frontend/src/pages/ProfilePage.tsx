@@ -191,7 +191,8 @@ export default function ProfilePage() {
   return (
     <Page>
       <PageHeader title={t("profilePage.title")} />
-      <Card as="form" onSubmit={handleSaveProfile}>
+      <Card>
+        <form onSubmit={handleSaveProfile}>
         <TextInput label={t("profilePage.userName")} value={userName} onChange={setUserName} />
         <TextInput label={t("profilePage.email")} value={email} onChange={setEmail} />
         <label className="upload-file__label" htmlFor="profile-primary-language">
@@ -259,6 +260,7 @@ export default function ProfilePage() {
             {profileMessage}
           </p>
         )}
+        </form>
       </Card>
       <TelegramLinkCard />
     </Page>

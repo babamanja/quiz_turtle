@@ -1,6 +1,4 @@
-import axios from "axios";
-
-import { apiClient } from "./_api";
+import { ApiError, apiClient } from "./_api";
 
 export type TelegramLinkStatus = {
   linked: boolean;
@@ -45,12 +43,9 @@ export async function claimTelegramLinkCode(
     await apiClient.post("/telegram/link-code/claim", { code, languageSource });
     return { ok: true };
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 409) {
-      const body = error.response.data as {
-        error?: string;
-        languageOptions?: LanguageChoiceOption[];
-      };
-      if (body.error === "language_choice_required" && body.languageOptions) {
+    if (error instanceof ApiError && error.status === 409) {
+      const body = error.data as { error?: string; languageOptions?: LanguageChoiceOption[] };
+      if (body?.error === "language_choice_required" && body.languageOptions) {
         return {
           ok: false,
           needsLanguageChoice: true,
@@ -59,13 +54,7 @@ export async function claimTelegramLinkCode(
       }
     }
 
-    const message =
-      axios.isAxiosError(error) && typeof error.response?.data?.error === "string"
-        ? error.response.data.error
-        : error instanceof Error
-          ? error.message
-          : "claim_failed";
-    return { ok: false, error: message };
+    return { ok: false, error: error instanceof Error ? error.message : "claim_failed" };
   }
 }
 

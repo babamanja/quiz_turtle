@@ -151,59 +151,6 @@ export async function selectSubscriptionByUserId(
   });
 }
 
-export async function activateSubscriptionByUserId(
-  userId: number,
-  planCode: SubscriptionPlanCode,
-): Promise<SubscriptionRow> {
-  return await getPrisma().$transaction(async (tx) => {
-    const currentPeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const amount = planCode === "premium" ? 9.99 : 0;
-
-    const payment = await tx.payment.create({
-      data: {
-        userId,
-        amount,
-        currency: "USD",
-        status: "succeeded",
-        provider: "manual_test",
-        description: `Test ${planCode} subscription`,
-        metadata: {
-          source: "billing_page_test",
-          planCode,
-        },
-        transactionType: "payment",
-      },
-    });
-
-    const subscription = await tx.subscription.upsert({
-      where: { userId },
-      update: {
-        planCode,
-        status: "active",
-        currentPeriodEnd,
-        paymentId: payment.id,
-      },
-      create: {
-        userId,
-        planCode,
-        status: "active",
-        currentPeriodEnd,
-        paymentId: payment.id,
-      },
-    });
-
-    return mapSubscriptionRow({
-      id: subscription.id,
-      userId: subscription.userId,
-      planCode: subscription.planCode,
-      status: subscription.status,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-      createdAt: subscription.createdAt,
-      paymentId: subscription.paymentId,
-    });
-  });
-}
-
 export async function activateSubscriptionFromPayment(input: {
   userId: number;
   planCode: SubscriptionPlanCode;

@@ -6,7 +6,7 @@ import * as userRepository from "../db/userRepository.js";
 import { getPrisma } from "../db/prisma.js";
 import * as dictionaryRepository from "../db/dictionaryRepository.js";
 
-const GUEST_EMAIL_DOMAIN = "guest.vocabbot.local";
+const GUEST_EMAIL_DOMAIN = "guest.languageturtle.local";
 
 export async function createGuestUser() {
   const email = `guest+${randomUUID()}@${GUEST_EMAIL_DOMAIN}`;

@@ -22,6 +22,13 @@ export function intervalMsForLevel(level) {
     const clamped = Math.max(0, Math.min(level, PIMSLEUR_LEVEL_MAX));
     return PIMSLEUR_DELAYS_MS[clamped] ?? PIMSLEUR_DELAYS_MS[0];
 }
+/** New / failed card: level 0, first review after the shortest delay. */
+export function initialSchedule(nowMs = Date.now()) {
+    return {
+        pimsleurLevel: 0,
+        nextReviewMs: nowMs + intervalMsForLevel(0),
+    };
+}
 export function scheduleAfterCorrect(currentLevel, nowMs = Date.now()) {
     const nextLevel = Math.min(currentLevel + 1, PIMSLEUR_LEVEL_MAX);
     return {
@@ -30,8 +37,5 @@ export function scheduleAfterCorrect(currentLevel, nowMs = Date.now()) {
     };
 }
 export function scheduleAfterWrong(nowMs = Date.now()) {
-    return {
-        pimsleurLevel: 0,
-        nextReviewMs: nowMs + intervalMsForLevel(0),
-    };
+    return initialSchedule(nowMs);
 }

@@ -12,6 +12,8 @@ import {
   isP3005Error,
   isP3009Error,
   isP3018Error,
+  isPrismaEngineLockedError,
+  runPrisma,
 } from "../scripts/prismaMigrate.mjs";
 
 const backendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -85,8 +87,41 @@ test("deploy-database.mjs baselines P3005 with migrate resolve --applied", () =>
   assert.doesNotMatch(source, /--rolled-back.*BASELINE_MIGRATION/);
 });
 
-test("dev script uses ensure-local-schema instead of raw migrate deploy", () => {
+test("isPrismaEngineLockedError detects Windows EPERM on query engine", () => {
+  assert.equal(
+    isPrismaEngineLockedError(
+      "EPERM: operation not permitted, rename '...query_engine-windows.dll.node.tmp' -> '...query_engine-windows.dll.node'",
+    ),
+    true,
+  );
+  assert.equal(isPrismaEngineLockedError("migration applied successfully"), false);
+});
+
+test("ensure-local-schema skips prisma generate when client already exists", () => {
+  const source = readFileSync(resolve(backendRoot, "scripts/ensure-local-schema.mjs"), "utf8");
+  assert.match(source, /runPrismaGenerateIfNeeded/);
+  assert.doesNotMatch(source, /runPrisma\(\["generate"\]\)/);
+});
+
+test("prisma generate links hoisted @prisma/client into backend workspace", () => {
+  const source = readFileSync(resolve(backendRoot, "scripts/prismaMigrate.mjs"), "utf8");
+  assert.match(source, /linkHoistedPrismaClientToBackend/);
+  assert.match(source, /symlinkSync/);
+});
+test("runPrisma invokes Prisma CLI without Windows .cmd shims", () => {
+  const source = readFileSync(resolve(backendRoot, "scripts/prismaMigrate.mjs"), "utf8");
+  assert.match(source, /prisma\/build\/index\.js/);
+  assert.doesNotMatch(source, /prisma\.cmd/);
+});
+
+test("runPrisma --version exits successfully", () => {
+  const result = runPrisma(["--version"], { capture: true });
+  assert.equal(result.status, 0, result.output);
+  assert.match(result.output, /prisma/i);
+});
+
+test("dev script starts tsx watch; schema prep is dev:prepare", () => {
   const pkg = JSON.parse(readFileSync(resolve(backendRoot, "package.json"), "utf8"));
-  assert.match(pkg.scripts.dev, /ensure-local-schema\.mjs/);
-  assert.doesNotMatch(pkg.scripts.dev, /migrate deploy/);
+  assert.match(pkg.scripts.dev, /tsx watch src\/index\.ts/);
+  assert.match(pkg.scripts["dev:prepare"], /ensure-local-schema\.mjs/);
 });

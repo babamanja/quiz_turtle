@@ -23,7 +23,6 @@ const DEFAULT_QUESTIONS: QualificationQuestion[] = [
     ],
   },
 ];
-const QUALIFICATION_SKIP_DEFER_DAYS = 7;
 
 function normalizeQuestions(input: unknown): QualificationQuestion[] {
   if (!Array.isArray(input)) {
@@ -79,120 +78,6 @@ export async function updateQualificationTemplate(input: {
   const questions = normalizeQuestions(input.questions);
   await qualificationRepository.upsertQualificationTemplate(questions);
   return { ok: true as const, questions };
-}
-
-export async function getMyQualificationState(userId: number, role: string) {
-  if (role === "admin") {
-    return {
-      ok: true as const,
-      completed: true,
-      shouldPrompt: false,
-      deferredUntil: null as string | null,
-      questions: [] as QualificationQuestion[],
-      completedAt: null as string | null,
-    };
-  }
-  const [template, completedAt, deferredUntil] = await Promise.all([
-    qualificationRepository.selectQualificationTemplate(),
-    qualificationRepository.selectQualificationCompletedAt(userId),
-    qualificationRepository.selectQualificationDeferredUntil(userId),
-  ]);
-  const isCompleted = completedAt !== null;
-  const deferredUntilDate = deferredUntil ? new Date(deferredUntil) : null;
-  const isDeferred =
-    !isCompleted &&
-    deferredUntilDate !== null &&
-    !Number.isNaN(deferredUntilDate.getTime()) &&
-    deferredUntilDate.getTime() > Date.now();
-  return {
-    ok: true as const,
-    completed: isCompleted,
-    shouldPrompt: !isCompleted && !isDeferred,
-    deferredUntil: isDeferred ? deferredUntil : null,
-    completedAt,
-    questions: template?.questions.length
-      ? template.questions
-      : DEFAULT_QUESTIONS,
-  };
-}
-
-export async function skipMyQualification(userId: number, role: string) {
-  if (role === "admin") {
-    return { ok: false as const, status: 403, error: "forbidden" };
-  }
-  const completedAt = await qualificationRepository.selectQualificationCompletedAt(userId);
-  if (completedAt) {
-    return { ok: true as const };
-  }
-  const deferredUntilDate = new Date(
-    Date.now() + QUALIFICATION_SKIP_DEFER_DAYS * 24 * 60 * 60 * 1000,
-  );
-  await qualificationRepository.upsertQualificationSkip({
-    userId,
-    deferredUntil: deferredUntilDate.toISOString(),
-  });
-  return { ok: true as const };
-}
-
-export async function submitMyQualification(
-  userId: number,
-  role: string,
-  input: { answers?: unknown },
-) {
-  if (role === "admin") {
-    return { ok: false as const, status: 403, error: "forbidden" };
-  }
-  if (!Array.isArray(input.answers)) {
-    return {
-      ok: false as const,
-      status: 400,
-      error: "answers must be an array",
-    };
-  }
-  const answers = input.answers
-    .map((item) => {
-      if (!item || typeof item !== "object") {
-        return null;
-      }
-      const obj = item as {
-        questionId?: unknown;
-        prompt?: unknown;
-        selectedOption?: unknown;
-        freeText?: unknown;
-      };
-      const questionId =
-        typeof obj.questionId === "string" ? obj.questionId.trim() : "";
-      const prompt = typeof obj.prompt === "string" ? obj.prompt.trim() : "";
-      const selectedOption =
-        typeof obj.selectedOption === "string" &&
-        obj.selectedOption.trim().length > 0
-          ? obj.selectedOption.trim()
-          : null;
-      const freeText =
-        typeof obj.freeText === "string" ? obj.freeText.trim() : "";
-      if (!questionId || !prompt || (!selectedOption && !freeText)) {
-        return null;
-      }
-      return { questionId, prompt, selectedOption, freeText };
-    })
-    .filter(
-      (
-        item,
-      ): item is {
-        questionId: string;
-        prompt: string;
-        selectedOption: string | null;
-        freeText: string;
-      } => item !== null,
-    );
-  if (answers.length === 0) {
-    return { ok: false as const, status: 400, error: "answers are required" };
-  }
-  await qualificationRepository.upsertQualificationSubmission({
-    userId,
-    answers,
-  });
-  return { ok: true as const };
 }
 
 type AdminQualificationAnswer = {

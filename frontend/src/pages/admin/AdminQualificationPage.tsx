@@ -16,7 +16,6 @@ import PageHeader from "../../components/UI/PageHeader";
 import PageSection from "../../components/UI/PageSection";
 import ResponsiveDataList from "../../components/UI/ResponsiveDataList";
 import type { DataListColumn } from "../../components/UI/dataListTypes";
-import TextArea from "../../components/UI/TextArea";
 import { useAdminPage } from "../../hooks/useAdminPage";
 import { formatRelativeTime } from "../../utils/convertTime";
 import "../style.scss";
@@ -213,7 +212,7 @@ export default function AdminQualificationPage() {
       <label className="upload-file__label" htmlFor="admin-qualification-template">
         {t("admin.qualificationLabel")}
       </label>
-      <TextArea
+      <textarea
         id="admin-qualification-template"
         className="upload-file__textarea"
         rows={12}
@@ -223,7 +222,7 @@ export default function AdminQualificationPage() {
       />
       <div className="upload-file__upload-control">
         <Button onClick={save} disabled={isLoading || isSaving}>
-          {isSaving ? t("upload.sending") : t("admin.saveQualification")}
+          {isSaving ? t("admin.saving") : t("admin.saveQualification")}
         </Button>
       </div>
       <p>{t("admin.qualificationHelp")}</p>

@@ -116,22 +116,22 @@ export function Header({ onOpenAuth }: HeaderProps) {
       : t('nav.dashboard')
 
   return (
-    <header className="qb-header">
-      <div className="qb-header__inner">
-        <a className="qb-logo" href="#top" onClick={closeMenu}>
-          <img className="qb-logo__icon" src="/landing/logo-icon.png" alt="" width={28} height={28} />
+    <header className="lt-header">
+      <div className="lt-header__inner">
+        <a className="lt-logo" href="#top" onClick={closeMenu}>
+          <img className="lt-logo__icon" src="/landing/logo-icon.png" alt="" width={28} height={28} />
           <span>{t('landing.nav.brand')}</span>
         </a>
         <nav
           id={menuId}
-          className={`qb-nav${menuOpen ? ' qb-nav--open' : ''}`}
+          className={`lt-nav${menuOpen ? ' lt-nav--open' : ''}`}
           aria-label={t('landing.nav.primaryNavAria')}
           aria-hidden={isNarrow ? !menuOpen : false}
         >
           {menuLinks.map(({ href, text }) => (
             <a
               key={href}
-              className="qb-nav__link"
+              className="lt-nav__link"
               href={href}
               onClick={closeMenu}
             >
@@ -141,7 +141,7 @@ export function Header({ onOpenAuth }: HeaderProps) {
           {!isLoggedIn ? (
             <Button
               style="primary"
-              className="qb-header__cta qb-header__cta--menu"
+              className="lt-header__cta lt-header__cta--menu"
               data-cta-id="landing_header_signup_menu"
               onClick={() => {
                 trackUiCtaClick('landing_header_signup_menu')
@@ -155,20 +155,20 @@ export function Header({ onOpenAuth }: HeaderProps) {
           ) : null}
         </nav>
         <div
-          className={`qb-header__auth${isLoggedIn ? ' qb-header__auth--logged-in' : ''}`}
+          className={`lt-header__auth${isLoggedIn ? ' lt-header__auth--logged-in' : ''}`}
           ref={isLoggedIn ? userMenuRef : undefined}
         >
           {isLoggedIn ? (
             <>
               {userLabel ? (
-                <span className="qb-header__user" title={user?.email}>
+                <span className="lt-header__user" title={user?.email}>
                   {userLabel}
                 </span>
               ) : null}
-              <div className="qb-header__user-menu">
+              <div className="lt-header__user-menu">
                 <button
                   type="button"
-                  className={`qb-header__user-burger${userMenuOpen ? ' qb-header__user-burger--open' : ''}`}
+                  className={`lt-header__user-burger${userMenuOpen ? ' lt-header__user-burger--open' : ''}`}
                   aria-expanded={userMenuOpen}
                   aria-controls={userMenuId}
                   aria-haspopup="menu"
@@ -179,21 +179,21 @@ export function Header({ onOpenAuth }: HeaderProps) {
                   }
                   onClick={() => setUserMenuOpen((open) => !open)}
                 >
-                  <span className="qb-header__burger-lines" aria-hidden>
-                    <span className="qb-header__burger-line" />
-                    <span className="qb-header__burger-line" />
-                    <span className="qb-header__burger-line" />
+                  <span className="lt-header__burger-lines" aria-hidden>
+                    <span className="lt-header__burger-line" />
+                    <span className="lt-header__burger-line" />
+                    <span className="lt-header__burger-line" />
                   </span>
                 </button>
                 {userMenuOpen ? (
                   <div
                     id={userMenuId}
-                    className="qb-header__user-dropdown"
+                    className="lt-header__user-dropdown"
                     role="menu"
                   >
                     <ButtonLink
                       to={appPath}
-                      className="qb-header__user-dropdown-link"
+                      className="lt-header__user-dropdown-link"
                       role="menuitem"
                       data-cta-id="landing_header_dashboard"
                       onClick={() => {
@@ -205,7 +205,7 @@ export function Header({ onOpenAuth }: HeaderProps) {
                     </ButtonLink>
                     <button
                       type="button"
-                      className="qb-header__user-dropdown-action"
+                      className="lt-header__user-dropdown-action"
                       role="menuitem"
                       onClick={handleLogOut}
                     >
@@ -218,7 +218,7 @@ export function Header({ onOpenAuth }: HeaderProps) {
           ) : (
             <Button
               style="primary"
-              className="qb-header__cta"
+              className="lt-header__cta"
               data-cta-id="landing_header_signup"
               onClick={() => {
                 trackUiCtaClick('landing_header_signup')
@@ -231,7 +231,7 @@ export function Header({ onOpenAuth }: HeaderProps) {
         </div>
         <button
           type="button"
-          className={`qb-header__burger${menuOpen ? ' qb-header__burger--open' : ''}`}
+          className={`lt-header__burger${menuOpen ? ' lt-header__burger--open' : ''}`}
           aria-expanded={menuOpen}
           aria-controls={menuId}
           aria-label={menuOpen ? t('landing.nav.menuClose') : t('landing.nav.menuOpen')}
@@ -240,17 +240,17 @@ export function Header({ onOpenAuth }: HeaderProps) {
             setMenuOpen((open) => !open)
           }}
         >
-          <span className="qb-header__burger-lines" aria-hidden>
-            <span className="qb-header__burger-line" />
-            <span className="qb-header__burger-line" />
-            <span className="qb-header__burger-line" />
+          <span className="lt-header__burger-lines" aria-hidden>
+            <span className="lt-header__burger-line" />
+            <span className="lt-header__burger-line" />
+            <span className="lt-header__burger-line" />
           </span>
         </button>
       </div>
       {menuOpen && isNarrow ? (
         <button
           type="button"
-          className="qb-header__backdrop"
+          className="lt-header__backdrop"
           aria-label={t('landing.nav.menuClose')}
           onClick={closeMenu}
         />

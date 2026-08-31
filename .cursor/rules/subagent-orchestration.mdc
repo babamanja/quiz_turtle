@@ -1,0 +1,38 @@
+---
+description: Delegate monorepo work to focused subagents by package ownership
+alwaysApply: true
+---
+
+# Subagent orchestration
+
+This repo is a npm workspaces monorepo: `backend`, `frontend`, `bot`, `packages/shared`.
+
+## Default specialists
+
+| Subagent | Own |
+| --- | --- |
+| `/planner` | Cross-package plans (readonly) |
+| `/prisma-db` | `backend/prisma`, migrations, generate scripts |
+| `/shared` | `@language-turtle/shared` under `packages/shared/` |
+| `/backend` | Express API under `backend/src`, backend tests |
+| `/frontend` | React UI under `frontend/` |
+| `/telegram-bot` | Telegraf bot under `bot/` |
+| `/reuse-auditor` | Find duplication / missed reuse (readonly) |
+| `/component-reuse` | Extract/reuse React components and UI hooks |
+| `/dry-refactor` | Extract functions, remove duplicate logic, tidy modules |
+| `/verifier` | Post-implementation checks |
+
+## Delegation rules
+
+1. Multi-package or unclear scope → start with `/planner`, then follow its order.
+2. Schema or migration needed → `/prisma-db` before feature code.
+3. Cross-package types/constants/contracts → `/shared` before consumers (`backend` / `frontend` / `telegram-bot`).
+4. Keep each specialist inside its folder boundaries; do not ask backend to edit React pages.
+5. Typical feature order: `prisma-db` → `shared` → `backend` → `frontend` / `telegram-bot` → `verifier`.
+6. Cleanliness / DRY: `/reuse-auditor` first (findings), then `/dry-refactor` and/or `/component-reuse`; if a shared contract is needed, `/shared` before consumers.
+7. After non-trivial work → `/verifier` with an explicit claim list.
+8. Parallelize only independent packages (e.g. frontend UI polish + bot copy) after prisma/shared contracts are stable.
+
+## Explicit invokes
+
+Users may call `/backend`, `/frontend`, `/telegram-bot`, `/prisma-db`, `/shared`, `/planner`, `/reuse-auditor`, `/component-reuse`, `/dry-refactor`, `/verifier` directly.

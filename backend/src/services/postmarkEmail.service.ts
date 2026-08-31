@@ -103,7 +103,7 @@ export async function sendEmailVerificationEmail(input: {
   const textBody = [
     `Hi ${input.userName},`,
     "",
-    "Confirm your email address for your AI Tutor account:",
+    "Confirm your email address for your Language Turtle account:",
     input.verifyUrl,
     "",
     "If you did not create an account, you can ignore this email.",
@@ -111,7 +111,7 @@ export async function sendEmailVerificationEmail(input: {
 
   const htmlBody = `
 <p>Hi ${safeName},</p>
-<p>Confirm your email address for your AI Tutor account.</p>
+<p>Confirm your email address for your Language Turtle account.</p>
 <p><a href="${escapeHtml(input.verifyUrl)}">Verify email</a></p>
 <p>If the button does not work, copy and paste this URL into your browser:</p>
 <p style="word-break:break-all;">${escapeHtml(input.verifyUrl)}</p>

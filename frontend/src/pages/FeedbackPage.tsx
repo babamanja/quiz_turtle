@@ -7,8 +7,6 @@ import Button from "../components/UI/Button/Button";
 import Card from "../components/UI/Card";
 import Page from "../components/UI/Page";
 import PageHeader from "../components/UI/PageHeader";
-import TextArea from "../components/UI/TextArea";
-
 import "./style.scss";
 
 const FEEDBACK_CATEGORIES: FeedbackCategory[] = ["bug", "feature", "question", "other"];
@@ -62,7 +60,8 @@ export default function FeedbackPage() {
     <Page width="full">
       <PageHeader title={t("feedbackPage.title")} subtitle={t("feedbackPage.description")} />
 
-      <Card as="form" onSubmit={handleSubmit}>
+      <Card>
+        <form onSubmit={handleSubmit}>
         <label className="upload-file__label" htmlFor="feedback-category">
           {t("feedbackPage.categoryLabel")}
         </label>
@@ -83,7 +82,7 @@ export default function FeedbackPage() {
         <label className="upload-file__label" htmlFor="feedback-message">
           {t("feedbackPage.messageLabel")}
         </label>
-        <TextArea
+        <textarea
           id="feedback-message"
           className="upload-file__textarea"
           rows={8}
@@ -113,6 +112,7 @@ export default function FeedbackPage() {
             {statusMessage}
           </p>
         ) : null}
+        </form>
       </Card>
     </Page>
   );

@@ -5,7 +5,6 @@ import ButtonLink from "../../components/UI/Button/ButtonLink";
 import Card from "../../components/UI/Card";
 import Page from "../../components/UI/Page";
 import PageHeader from "../../components/UI/PageHeader";
-import { formatUsd } from "../../config/pricing";
 
 import "../style.scss";
 
@@ -64,7 +63,7 @@ export default function PaymentResultView({
           label: t("billing.amountLabel"),
           value:
             currency.toUpperCase() === "USD"
-              ? formatUsd(amountUsd)
+              ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amountUsd)
               : `${amountUsd} ${currency.toUpperCase()}`,
         }
       : null;
@@ -75,7 +74,7 @@ export default function PaymentResultView({
     <Page width="full" className="subscription-page payment-result-page">
       <PageHeader title={title} />
 
-      <Card as="article" className="payment-result">
+      <Card className="payment-result">
         <div className={`payment-result__banner payment-result__banner--${variant}`}>
           <span className="payment-result__icon" aria-hidden>
             {VARIANT_ICON[variant]}

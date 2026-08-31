@@ -1,55 +1,6 @@
 import type { Request, Response } from "express";
 
 import * as qualificationService from "../services/qualification.service.js";
-import {
-  getRequiredUserId,
-  getUserRole,
-  sendServiceFailure,
-  sendUnauthorized,
-} from "./helpers.js";
-
-export async function getMyQualification(req: Request, res: Response) {
-  const userId = getRequiredUserId(req);
-  if (userId === null) {
-    return sendUnauthorized(res);
-  }
-  const result = await qualificationService.getMyQualificationState(
-    userId,
-    getUserRole(req),
-  );
-  return res.status(200).json(result);
-}
-
-export async function submitMyQualification(req: Request, res: Response) {
-  const userId = getRequiredUserId(req);
-  if (userId === null) {
-    return sendUnauthorized(res);
-  }
-  const result = await qualificationService.submitMyQualification(
-    userId,
-    getUserRole(req),
-    req.body ?? {},
-  );
-  if (result.ok === false) {
-    return sendServiceFailure(res, result);
-  }
-  return res.status(201).json({ ok: true });
-}
-
-export async function skipMyQualification(req: Request, res: Response) {
-  const userId = getRequiredUserId(req);
-  if (userId === null) {
-    return sendUnauthorized(res);
-  }
-  const result = await qualificationService.skipMyQualification(
-    userId,
-    getUserRole(req),
-  );
-  if (result.ok === false) {
-    return sendServiceFailure(res, result);
-  }
-  return res.status(201).json({ ok: true });
-}
 
 export async function getQualificationTemplate(_req: Request, res: Response) {
   const result = await qualificationService.getQualificationTemplate();

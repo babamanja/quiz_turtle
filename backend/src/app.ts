@@ -1,7 +1,5 @@
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
-import cookieParser from "cookie-parser";
-import helmet from "helmet";
 import { collectConfiguredOrigins } from "./config/publicOrigins.js";
 import * as subscriptionController from "./controllers/subscription.controller.js";
 import { asyncHandler } from "./middleware/asyncHandler.js";
@@ -11,7 +9,6 @@ import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
-import qualificationRoutes from "./routes/qualification.routes.js";
 import feedbackRoutes from "./routes/feedback.routes.js";
 import telegramRoutes from "./routes/telegram.routes.js";
 import internalRoutes from "./routes/internal.routes.js";
@@ -44,18 +41,15 @@ export function createApp() {
     app.set("trust proxy", 1);
   }
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        useDefaults: false,
-        directives: {
-          defaultSrc: ["'none'"],
-          frameAncestors: ["'none'"],
-          baseUri: ["'none'"],
-        },
-      },
-    }),
-  );
+  app.use((_req, res, next) => {
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+    );
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    next();
+  });
   app.use(
     cors({
       credentials: true,
@@ -68,8 +62,6 @@ export function createApp() {
       },
     }),
   );
-  app.use(cookieParser());
-
   app.post(
     "/api/subscriptions/provider/paddle/webhook",
     webhookRateLimiter,
@@ -99,7 +91,6 @@ export function createApp() {
   app.use("/api/users", userRoutes);
   app.use("/api/auth", authRoutes);
   app.use("/api/subscriptions", subscriptionRoutes);
-  app.use("/api/qualification", qualificationRoutes);
   app.use("/api/feedback", feedbackRoutes);
   app.use("/api/telegram", telegramRoutes);
   app.use("/api/internal", internalRoutes);

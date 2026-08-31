@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { formatUsd, PREMIUM_USD_MONTHLY } from '../../../config/pricing'
+import { PREMIUM_USD_MONTHLY } from '@language-turtle/shared'
 
 type PlanCopy = {
   name: string
@@ -28,33 +28,35 @@ export function PricingSection() {
       },
       {
         ...premium,
-        price: formatUsd(PREMIUM_USD_MONTHLY),
+        price: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+          PREMIUM_USD_MONTHLY,
+        ),
         badge: premium.badge,
       },
     ]
   }, [t])
 
   return (
-    <section className="qb-section" id="pricing" aria-labelledby="pricing-title">
-      <div className="qb-section__head">
-        <h2 className="qb-heading--h2" id="pricing-title">
+    <section className="lt-section" id="pricing" aria-labelledby="pricing-title">
+      <div className="lt-section__head">
+        <h2 className="lt-heading--h2" id="pricing-title">
           {t('landing.pricing.title')}
         </h2>
-        <p className="qb-lead">{t('landing.pricing.subtitle')}</p>
+        <p className="lt-lead">{t('landing.pricing.subtitle')}</p>
       </div>
-      <ul className="qb-pricing-grid">
+      <ul className="lt-pricing-grid">
         {plans.map((plan) => (
           <li key={plan.name}>
             <article
               className={
-                plan.badge ? 'qb-pricing-card qb-pricing-card--featured' : 'qb-pricing-card'
+                plan.badge ? 'lt-pricing-card lt-pricing-card--featured' : 'lt-pricing-card'
               }
             >
-              {plan.badge ? <p className="qb-tag">{plan.badge}</p> : null}
-              <h3 className="qb-heading--h3">{plan.name}</h3>
+              {plan.badge ? <p className="lt-tag">{plan.badge}</p> : null}
+              <h3 className="lt-heading--h3">{plan.name}</h3>
               <p>
-                <span className="qb-price">{plan.price}</span>{' '}
-                <span className="qb-price-period">{plan.period}</span>
+                <span className="lt-price">{plan.price}</span>{' '}
+                <span className="lt-price-period">{plan.period}</span>
               </p>
               <ul>
                 {plan.features.map((feature) => (

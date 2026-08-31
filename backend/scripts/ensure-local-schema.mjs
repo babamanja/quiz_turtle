@@ -9,7 +9,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadEnv } from "./loadEnv.mjs";
-import { BASELINE_MIGRATION, BASELINE_DRIFT_REPAIR_SQL, isP3005Error, runPrisma } from "./prismaMigrate.mjs";
+import { BASELINE_MIGRATION, BASELINE_DRIFT_REPAIR_SQL, isP3005Error, runPrisma, runPrismaGenerateIfNeeded } from "./prismaMigrate.mjs";
 
 const backendDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const backendEnvPath = resolve(backendDir, ".env");
@@ -78,14 +78,13 @@ function syncSchemaDrift() {
   }
 }
 
-function generateClient() {
-  console.log("[ensure-local-schema] Running prisma generate…");
-  return runPrisma(["generate"]);
+function generateClientIfNeeded() {
+  return runPrismaGenerateIfNeeded();
 }
 
 let result = migrateDeploy(true);
 if (result.status === 0) {
-  const genResult = generateClient();
+  const genResult = generateClientIfNeeded();
   if (genResult.status !== 0) {
     console.error(
       "[ensure-local-schema] prisma generate failed. Stop the backend and run: npm run db:generate",
@@ -104,7 +103,7 @@ if (isP3005Error(result.output)) {
     process.exit(result.status);
   }
   syncSchemaDrift();
-  const genResult = generateClient();
+  const genResult = generateClientIfNeeded();
   if (genResult.status !== 0) {
     console.error(
       "[ensure-local-schema] prisma generate failed. Stop the backend and run: npm run db:generate",

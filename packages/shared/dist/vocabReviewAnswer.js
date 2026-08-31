@@ -63,6 +63,3 @@ export function evaluateVocabAnswer(userAnswer, expected, alternateAnswers = [],
     }
     return "wrong";
 }
-export function matchesVocabAnswer(userAnswer, expected) {
-    return evaluateVocabAnswer(userAnswer, expected) === "exact";
-}

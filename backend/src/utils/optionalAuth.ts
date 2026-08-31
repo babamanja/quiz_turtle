@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-function getJwtSecret(): string {
+export function getJwtSecret(): string {
   const secret = process.env.AUTH_JWT_SECRET?.trim();
   if (!secret) {
     throw new Error("AUTH_JWT_SECRET is required");
@@ -8,15 +8,23 @@ function getJwtSecret(): string {
   return secret;
 }
 
+export function extractBearerToken(headerValue: unknown): string {
+  if (typeof headerValue !== "string") {
+    return "";
+  }
+  const [scheme, token] = headerValue.split(" ");
+  if (scheme?.toLowerCase() !== "bearer" || !token) {
+    return "";
+  }
+  return token.trim();
+}
+
 export function extractAccessToken(req: {
   headers?: { authorization?: string | string[] };
 }): string | null {
   const header = req.headers?.authorization;
   const value = Array.isArray(header) ? header[0] : header;
-  if (typeof value !== "string" || !value.startsWith("Bearer ")) {
-    return null;
-  }
-  const token = value.slice("Bearer ".length).trim();
+  const token = extractBearerToken(value);
   return token.length > 0 ? token : null;
 }
 

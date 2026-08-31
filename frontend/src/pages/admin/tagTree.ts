@@ -93,20 +93,3 @@ export function toggleTagSelection(
 
   return [...new Set([...selectedTagIds, tagId, ...getAncestorTagIds(tagId, tags)])];
 }
-
-export type TagSelectOption = {
-  id: number;
-  label: string;
-};
-
-export function flattenTagOptions(nodes: TagTreeNode[], prefix = ""): TagSelectOption[] {
-  const options: TagSelectOption[] = [];
-
-  for (const node of nodes) {
-    const label = prefix ? `${prefix} › ${node.name}` : node.name;
-    options.push({ id: node.id, label });
-    options.push(...flattenTagOptions(node.children, label));
-  }
-
-  return options;
-}

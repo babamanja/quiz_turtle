@@ -1,15 +1,9 @@
 import type { SubscriptionBillingPeriod } from "../config/paddle.js";
 import * as subscriptionRepository from "../db/subscriptionRepository.js";
-
-export {
-  PREMIUM_USD_MONTHLY,
-  PREMIUM_USD_YEARLY,
-} from "@vocab-bot/shared/pricing";
-
 import {
   PREMIUM_USD_MONTHLY,
   PREMIUM_USD_YEARLY,
-} from "@vocab-bot/shared/pricing";
+} from "@language-turtle/shared";
 
 export function getSubscriptionAmount(
   planCode: subscriptionRepository.SubscriptionPlanCode,

@@ -1,25 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as userRepository from "../db/userRepository.js";
-
-function getJwtSecret(): string {
-  const secret = process.env.AUTH_JWT_SECRET?.trim();
-  if (!secret) {
-    throw new Error("AUTH_JWT_SECRET is required");
-  }
-  return secret;
-}
-
-function extractBearerToken(headerValue: unknown): string {
-  if (typeof headerValue !== "string") {
-    return "";
-  }
-  const [scheme, token] = headerValue.split(" ");
-  if (scheme?.toLowerCase() !== "bearer" || !token) {
-    return "";
-  }
-  return token.trim();
-}
+import { extractBearerToken, getJwtSecret } from "../utils/optionalAuth.js";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = extractBearerToken(req.headers.authorization);

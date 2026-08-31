@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 import { joinClassNames } from "./joinClassNames";
 import "./layout.scss";
@@ -6,43 +6,31 @@ import "./layout.scss";
 type CardVariant = "default" | "flat" | "stat";
 type CardPadding = "default" | "none" | "compact";
 
-type CardProps<E extends ElementType = "div"> = {
-  as?: E;
+type CardProps = {
   children: ReactNode;
   variant?: CardVariant;
   padding?: CardPadding;
   className?: string;
-} & Omit<ComponentPropsWithoutRef<E>, "as" | "children" | "className">;
+} & Omit<HTMLAttributes<HTMLDivElement>, "className">;
 
-function buildCardClassName(
-  variant: CardVariant,
-  padding: CardPadding,
-  className?: string,
-): string {
-  return joinClassNames(
-    "card",
-    variant !== "default" && `card--${variant}`,
-    padding !== "default" && `card--padding-${padding}`,
-    className,
-  );
-}
-
-export default function Card<E extends ElementType = "div">({
-  as,
+export default function Card({
   children,
   variant = "default",
   padding = "default",
   className,
   ...rest
-}: CardProps<E>) {
-  const Component = as ?? "div";
-
+}: CardProps) {
   return (
-    <Component
-      className={buildCardClassName(variant, padding, className)}
+    <div
+      className={joinClassNames(
+        "card",
+        variant !== "default" && `card--${variant}`,
+        padding !== "default" && `card--padding-${padding}`,
+        className,
+      )}
       {...rest}
     >
       {children}
-    </Component>
+    </div>
   );
 }

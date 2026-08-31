@@ -192,7 +192,7 @@ export default function PaymentCheckoutPage() {
     <Page width="full" className="subscription-page payment-result-page">
       <PageHeader title={pageTitle} subtitle={t("billing.checkoutInProgress")} />
 
-      <Card as="article" className="payment-result">
+      <Card className="payment-result">
         <p className="payment-result__loading">
           {isProcessingPayment
             ? t("billing.processingPayment")

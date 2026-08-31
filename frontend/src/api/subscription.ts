@@ -75,7 +75,6 @@ export async function createCheckoutSession(
 ): Promise<CheckoutSession> {
   const { data } = await apiClient.post<CheckoutSession>("/subscriptions/checkout-session", {
     planCode,
-    checkoutType: "subscription",
     billingPeriod: options?.billingPeriod,
     appBaseUrl: window.location.origin,
   });
@@ -109,10 +108,7 @@ export async function syncPaymentFromPaddle(
 ): Promise<SubscriptionPayment> {
   const { data } = await apiClient.post<SubscriptionPayment>(
     `/subscriptions/payments/${paymentId}/sync-paddle`,
-    {},
-    {
-      params: { appBaseUrl: window.location.origin },
-    },
+    { appBaseUrl: window.location.origin },
   );
   return data;
 }
@@ -125,10 +121,7 @@ export async function abandonPayment(
 ): Promise<SubscriptionPayment> {
   const { data } = await apiClient.post<SubscriptionPayment>(
     `/subscriptions/payments/${paymentId}/abandon`,
-    { reason },
-    {
-      params: { appBaseUrl: window.location.origin },
-    },
+    { reason, appBaseUrl: window.location.origin },
   );
   return data;
 }

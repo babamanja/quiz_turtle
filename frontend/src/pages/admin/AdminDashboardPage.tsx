@@ -22,6 +22,7 @@ const LINKS: AdminDashboardLink[] = [
   { to: "/admin/tags", titleKey: "dashboard.admin.links.tags.title", descKey: "dashboard.admin.links.tags.desc" },
   { to: "/admin/languages", titleKey: "dashboard.admin.links.languages.title", descKey: "dashboard.admin.links.languages.desc" },
   { to: "/admin/words", titleKey: "dashboard.admin.links.words.title", descKey: "dashboard.admin.links.words.desc" },
+  { to: "/admin/stories", titleKey: "dashboard.admin.links.stories.title", descKey: "dashboard.admin.links.stories.desc" },
   { to: "/admin/translations", titleKey: "dashboard.admin.links.translations.title", descKey: "dashboard.admin.links.translations.desc" },
   { to: "/admin/ai-usage", titleKey: "dashboard.admin.links.aiUsage.title", descKey: "dashboard.admin.links.aiUsage.desc" },
 ];
@@ -34,13 +35,15 @@ export default function AdminDashboardPage() {
       <PageHeader title={t("dashboard.admin.heading")} subtitle={t("dashboard.admin.intro")} />
       <ul className="link-card-grid">
         {LINKS.map((link) => (
-          <Card as="li" key={link.to} className="link-card">
-            <h2 className="link-card__title">{t(link.titleKey)}</h2>
-            <p className="link-card__desc">{t(link.descKey)}</p>
-            <ButtonLink to={link.to} style="primary">
-              {t("dashboard.admin.open")}
-            </ButtonLink>
-          </Card>
+          <li key={link.to}>
+            <Card className="link-card">
+              <h2 className="link-card__title">{t(link.titleKey)}</h2>
+              <p className="link-card__desc">{t(link.descKey)}</p>
+              <ButtonLink to={link.to} style="primary">
+                {t("dashboard.admin.open")}
+              </ButtonLink>
+            </Card>
+          </li>
         ))}
       </ul>
     </Page>

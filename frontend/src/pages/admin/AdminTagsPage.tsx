@@ -15,26 +15,11 @@ import PageHeader from "../../components/UI/PageHeader";
 import TextInput from "../../components/UI/TextInput";
 import { useAdminPage } from "../../hooks/useAdminPage";
 import TagHierarchyList from "./TagHierarchyList";
-import { buildTagTree } from "./tagTree";
+import { buildTagTree, getDescendantTagIds } from "./tagTree";
 
 import "../style.scss";
 
 type TagFormMode = "create" | "edit";
-
-function collectDescendantIds(tags: AdminTag[], tagId: number): Set<number> {
-  const result = new Set<number>();
-  const queue = [tagId];
-  while (queue.length > 0) {
-    const id = queue.pop()!;
-    for (const tag of tags) {
-      if (tag.parentId === id && !result.has(tag.id)) {
-        result.add(tag.id);
-        queue.push(tag.id);
-      }
-    }
-  }
-  return result;
-}
 
 function mapTagError(code: string, t: (key: string) => string): string {
   switch (code) {
@@ -84,7 +69,7 @@ export default function AdminTagsPage() {
 
   const parentOptions = useMemo(() => {
     if (formMode === "edit" && editingTag) {
-      const excluded = collectDescendantIds(tags, editingTag.id);
+      const excluded = new Set(getDescendantTagIds(editingTag.id, tags));
       excluded.add(editingTag.id);
       return tags.filter((tag) => !excluded.has(tag.id));
     }

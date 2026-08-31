@@ -93,7 +93,7 @@ test("POST /api/auth/logout clears session cookie", async () => {
   const setCookie = res.headers["set-cookie"];
   assert.ok(setCookie);
   const cookieHeader = Array.isArray(setCookie) ? setCookie.join(";") : setCookie;
-  assert.match(cookieHeader, /aiTutorRefreshToken=/);
+  assert.match(cookieHeader, /languageTurtleRefreshToken=/);
 });
 
 test("GET /api/users/me/dashboard-stats without Authorization returns 401", async () => {

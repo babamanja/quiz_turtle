@@ -4,13 +4,13 @@ services:
     environment:
       POSTGRES_USER: prisma
       POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: vocab_bot
+      POSTGRES_DB: language_turtle
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U prisma -d vocab_bot"]
+      test: ["CMD-SHELL", "pg_isready -U prisma -d language_turtle"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -22,7 +22,7 @@ services:
     env_file:
       - env/.env
     environment:
-      DATABASE_URL: postgresql://prisma:prisma@db:5432/vocab_bot
+      DATABASE_URL: postgresql://prisma:prisma@db:5432/language_turtle
     depends_on:
       db:
         condition: service_healthy
@@ -37,7 +37,7 @@ services:
     env_file:
       - env/.env
     environment:
-      DATABASE_URL: postgresql://prisma:prisma@db:5432/vocab_bot
+      DATABASE_URL: postgresql://prisma:prisma@db:5432/language_turtle
       BACKEND_INTERNAL_URL: http://backend:3001
     depends_on:
       db:

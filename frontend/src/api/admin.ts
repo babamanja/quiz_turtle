@@ -470,23 +470,6 @@ export type AdminDictionary = {
   tagNames: string[];
 };
 
-export type AdminDictionariesQuery = {
-  page?: number;
-  pageSize?: number;
-  sortBy?: "id" | "primaryWord" | "learningWord" | "userPairCount";
-  sortOrder?: "asc" | "desc";
-  search?: string;
-};
-
-export async function getAdminDictionaries(
-  query: AdminDictionariesQuery = {},
-): Promise<PaginatedResponse<AdminDictionary>> {
-  const { data } = await apiClient.get<PaginatedResponse<AdminDictionary>>("/admin/dictionaries", {
-    params: query,
-  });
-  return data;
-}
-
 export type AdminTranslation = AdminDictionary;
 
 export type AdminTranslationsQuery = {
@@ -533,29 +516,12 @@ export async function getAdminTranslation(translationId: number): Promise<AdminT
   return data;
 }
 
-export async function createAdminTranslation(
-  payload: AdminTranslationInput,
-): Promise<AdminTranslation> {
-  const { data } = await apiClient.post<AdminTranslation>("/admin/translations", payload);
-  return data;
-}
-
 export async function createAdminTranslationRows(
   payload: {
     primaryLanguageId: number;
     learningLanguageId: number;
     rows: AdminTranslationRowInput[];
   },
-): Promise<AdminTranslationBatchResult> {
-  const { data } = await apiClient.post<AdminTranslationBatchResult>(
-    "/admin/translations",
-    payload,
-  );
-  return data;
-}
-
-export async function createAdminTranslations(
-  payload: AdminTranslationInput & { learningTexts: string[] },
 ): Promise<AdminTranslationBatchResult> {
   const { data } = await apiClient.post<AdminTranslationBatchResult>(
     "/admin/translations",

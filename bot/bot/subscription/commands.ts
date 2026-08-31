@@ -3,7 +3,7 @@ import type { PrismaClient } from '@prisma/client';
 import {
   TELEGRAM_STARS_PREMIUM_MONTHLY,
   TELEGRAM_STARS_PREMIUM_YEARLY,
-} from '@vocab-bot/shared/pricing';
+} from '@language-turtle/shared';
 import { getUserIdByTelegram } from '../../domain/telegram-user';
 import config from '../../config';
 
@@ -29,7 +29,7 @@ async function handleStarsCheckout(
   const payload: StarsPayload = { userId, billingPeriod };
   await ctx.answerCbQuery();
   await ctx.replyWithInvoice({
-    title: 'Vocab Bot Premium',
+    title: 'Language Turtle Premium',
     description:
       billingPeriod === 'yearly' ? 'Premium access for 12 months' : 'Premium access for 1 month',
     payload: JSON.stringify(payload),

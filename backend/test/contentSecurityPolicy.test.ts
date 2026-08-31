@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildSpaContentSecurityPolicy } from "@vocab-bot/shared/contentSecurityPolicy";
+import { buildSpaContentSecurityPolicy } from "@language-turtle/shared";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 

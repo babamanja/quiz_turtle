@@ -21,15 +21,28 @@ if (PIMSLEUR_DELAYS_MS.length !== PIMSLEUR_LEVEL_MAX + 1) {
   throw new Error("PIMSLEUR_DELAYS_MS must have length PIMSLEUR_LEVEL_MAX + 1");
 }
 
+export type PimsleurSchedule = {
+  pimsleurLevel: number;
+  nextReviewMs: number;
+};
+
 export function intervalMsForLevel(level: number): number {
   const clamped = Math.max(0, Math.min(level, PIMSLEUR_LEVEL_MAX));
   return PIMSLEUR_DELAYS_MS[clamped] ?? PIMSLEUR_DELAYS_MS[0];
 }
 
+/** New / failed card: level 0, first review after the shortest delay. */
+export function initialSchedule(nowMs: number = Date.now()): PimsleurSchedule {
+  return {
+    pimsleurLevel: 0,
+    nextReviewMs: nowMs + intervalMsForLevel(0),
+  };
+}
+
 export function scheduleAfterCorrect(
   currentLevel: number,
   nowMs: number = Date.now(),
-): { pimsleurLevel: number; nextReviewMs: number } {
+): PimsleurSchedule {
   const nextLevel = Math.min(currentLevel + 1, PIMSLEUR_LEVEL_MAX);
   return {
     pimsleurLevel: nextLevel,
@@ -37,12 +50,6 @@ export function scheduleAfterCorrect(
   };
 }
 
-export function scheduleAfterWrong(nowMs: number = Date.now()): {
-  pimsleurLevel: number;
-  nextReviewMs: number;
-} {
-  return {
-    pimsleurLevel: 0,
-    nextReviewMs: nowMs + intervalMsForLevel(0),
-  };
+export function scheduleAfterWrong(nowMs: number = Date.now()): PimsleurSchedule {
+  return initialSchedule(nowMs);
 }

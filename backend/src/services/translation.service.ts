@@ -2,7 +2,7 @@ import * as languageRepository from "../db/languageRepository.js";
 import * as tagRepository from "../db/tagRepository.js";
 import * as vocabPairRepository from "../db/vocabPairRepository.js";
 import * as vocabWordRepository from "../db/vocabWordRepository.js";
-import { normalizePartOfSpeechInput } from "@vocab-bot/shared/partOfSpeech";
+import { normalizePartOfSpeechInput } from "@language-turtle/shared";
 
 const MAX_WORD_TEXT_LENGTH = 200;
 

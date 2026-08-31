@@ -1,4 +1,4 @@
-import { normalizePartOfSpeechInput } from "@vocab-bot/shared/partOfSpeech";
+import { normalizePartOfSpeechInput } from "@language-turtle/shared";
 
 import * as languageRepository from "../db/languageRepository.js";
 import * as nestRepository from "../db/nestRepository.js";

@@ -6,13 +6,13 @@ COPY packages/shared/package.json packages/shared/
 COPY bot/package.json bot/
 COPY backend/prisma backend/prisma
 
-RUN npm ci --workspace @vocab-bot/shared --workspace vocab-bot --include-workspace-root
+RUN npm ci --workspace @language-turtle/shared --workspace language-turtle-bot --include-workspace-root
 RUN npx prisma generate --schema backend/prisma/schema.prisma
 
 COPY packages/shared packages/shared
 COPY bot bot
 
-RUN npm run build -w @vocab-bot/shared && npm run build -w vocab-bot
+RUN npm run build -w @language-turtle/shared && npm run build -w language-turtle-bot
 
 WORKDIR /app/bot
 CMD ["node", "dist/main.js"]

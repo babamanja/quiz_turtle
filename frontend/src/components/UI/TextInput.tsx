@@ -1,7 +1,5 @@
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { useId, useState } from "react";
 
-import IconComponent from "./Icon";
 import "./style.scss";
 
 type TextInputBaseProps = {
@@ -13,6 +11,7 @@ type TextInputBaseProps = {
   disabled?: boolean;
   required?: boolean;
   minLength?: number;
+  placeholder?: string;
   showPasswordLabel?: string;
   hidePasswordLabel?: string;
 };
@@ -20,6 +19,26 @@ type TextInputBaseProps = {
 type TextInputProps = TextInputBaseProps & {
   type?: "text" | "password";
 };
+
+function EyeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.4" />
+      <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c7 0 10 7 10 7a16.9 16.9 0 0 1-3.2 4.4" />
+      <path d="M6.6 6.6A16.8 16.8 0 0 0 2 12s3.5 7 10 7a10.4 10.4 0 0 0 4.2-.8" />
+    </svg>
+  );
+}
 
 export default function TextInput({
   label,
@@ -31,6 +50,7 @@ export default function TextInput({
   disabled,
   required,
   minLength,
+  placeholder,
   showPasswordLabel = "Show password",
   hidePasswordLabel = "Hide password",
 }: TextInputProps) {
@@ -51,6 +71,7 @@ export default function TextInput({
       disabled={disabled}
       required={required}
       minLength={minLength}
+      placeholder={placeholder}
     />
   );
 
@@ -67,7 +88,7 @@ export default function TextInput({
             aria-label={isPasswordVisible ? hidePasswordLabel : showPasswordLabel}
             onClick={() => setIsPasswordVisible((prev) => !prev)}
           >
-            <IconComponent faIcon={!isPasswordVisible ? faEyeSlash : faEye} />
+            {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
           </button>
         </div>
       ) : (

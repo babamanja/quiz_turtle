@@ -9,8 +9,30 @@ import {
   sendUnauthorized,
 } from "./helpers.js";
 
-const REFRESH_COOKIE_NAME = "aiTutorRefreshToken";
+const REFRESH_COOKIE_NAME = "languageTurtleRefreshToken";
 const REFRESH_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+
+function readRefreshCookie(cookieHeader: string | undefined): string {
+  if (!cookieHeader) {
+    return "";
+  }
+  for (const part of cookieHeader.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq === -1) {
+      continue;
+    }
+    if (part.slice(0, eq).trim() !== REFRESH_COOKIE_NAME) {
+      continue;
+    }
+    const value = part.slice(eq + 1).trim();
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+  return "";
+}
 
 function setRefreshCookie(res: Response, refreshToken: string) {
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
@@ -192,7 +214,7 @@ export async function restoreDeletedAccount(req: Request, res: Response) {
 
 export async function refresh(req: Request, res: Response) {
   const requestId = extractRequestId(req);
-  const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME] ?? "";
+  const refreshToken = readRefreshCookie(req.headers.cookie);
   const result = await authService.refreshSession(refreshToken);
   if (!result.ok) {
     clearRefreshCookie(res);

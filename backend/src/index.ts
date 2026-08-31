@@ -7,6 +7,8 @@ import { disconnectPrisma, getPrisma, initPrisma } from "./db/prisma.js";
 import { shutdownAnalytics } from "./services/analytics.service.js";
 import { bootstrapAdminRoles } from "./services/adminBootstrap.service.js";
 
+console.log("[backend] Starting…");
+
 const PORT = Number(process.env.PORT) || 3001;
 const databaseUrl =
   process.env.DATABASE_URL?.trim() ||
@@ -20,15 +22,27 @@ if (!databaseUrl || databaseUrl.includes("undefined")) {
 }
 
 initPrisma(databaseUrl);
+console.log("[backend] Connecting to database…");
 await getPrisma().$connect();
+console.log("[backend] Database connected");
 await bootstrapAdminRoles();
 
 const app = createApp();
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(
     `Backend listening on http://localhost:${PORT} (APP_ENV=${process.env.APP_ENV ?? "local"})`,
   );
+});
+
+server.on("error", (error: NodeJS.ErrnoException) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(
+      `[backend] Port ${PORT} is already in use. Stop the other process and retry.`,
+    );
+    process.exit(1);
+  }
+  throw error;
 });
 
 const shutdown = async () => {

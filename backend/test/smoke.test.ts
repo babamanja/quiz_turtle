@@ -9,6 +9,9 @@ test("GET /api/health returns ok", async () => {
   const app = createApp();
   const res = await request(app).get("/api/health");
   assert.equal(res.status, 200);
+  assert.equal(res.headers["content-security-policy"], "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  assert.equal(res.headers["x-content-type-options"], "nosniff");
+  assert.equal(res.headers["x-frame-options"], "DENY");
   assert.equal(res.headers["content-type"]?.includes("application/json"), true);
   assert.equal(res.body?.ok, true);
 });

@@ -15,14 +15,14 @@ export function Footer() {
   ]
 
   return (
-    <footer className="qb-footer" id="contact">
-      <div className="qb-footer__inner">
-        <div className="qb-footer__top">
-          <a className="qb-footer__brand" href="#top">
+    <footer className="lt-footer" id="contact">
+      <div className="lt-footer__inner">
+        <div className="lt-footer__top">
+          <a className="lt-footer__brand" href="#top">
             <img src="/landing/logo-icon.png" alt="" width={28} height={28} />
             <span>{t('landing.nav.brand')}</span>
           </a>
-          <nav className="qb-footer__links" aria-label="Footer">
+          <nav className="lt-footer__links" aria-label="Footer">
             {footerLinks.map((link) => (
               <span key={link.label}>
                 {link.isRoute ? (
@@ -33,19 +33,19 @@ export function Footer() {
               </span>
             ))}
           </nav>
-          <div className="qb-footer__social" aria-label={t('landing.footer.socialAria')}>
-            <a href="#" aria-label="Instagram" className="qb-footer__social-link">
+          <div className="lt-footer__social" aria-label={t('landing.footer.socialAria')}>
+            <a href="#" aria-label="Instagram" className="lt-footer__social-link">
               IG
             </a>
-            <a href="#" aria-label="X (Twitter)" className="qb-footer__social-link">
+            <a href="#" aria-label="X (Twitter)" className="lt-footer__social-link">
               X
             </a>
-            <a href="#" aria-label="Telegram" className="qb-footer__social-link">
+            <a href="#" aria-label="Telegram" className="lt-footer__social-link">
               TG
             </a>
           </div>
         </div>
-        <p className="qb-footer__copy">
+        <p className="lt-footer__copy">
           {t('landing.footer.copyright', { year })}
           {' · '}
           <Link to={REFUND_POLICY_PATH}>{t('landing.footer.refund')}</Link>

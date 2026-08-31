@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useLockBody } from "../../hooks/useLockBody";
 import AuthPanel, { type AuthMode } from "./AuthPanel";
 
 type AuthModalProps = {
@@ -19,24 +19,7 @@ export default function AuthModal({
   redirectOnSuccess = true,
 }: AuthModalProps) {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, onClose]);
+  useLockBody(open, onClose);
 
   if (!open) {
     return null;

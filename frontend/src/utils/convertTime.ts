@@ -1,5 +1,3 @@
-export const dateFormat = "YYYY-MM-DD HH:mm";
-
 type DateInput = string | Date | number | null | undefined;
 
 const RELATIVE_UNITS: ReadonlyArray<[Intl.RelativeTimeFormatUnit, number]> = [
@@ -18,10 +16,6 @@ function parseDate(value: DateInput): Date | null {
   }
   const date = value instanceof Date ? value : new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function padTwo(value: number): string {
-  return String(value).padStart(2, "0");
 }
 
 export function formatRelativeTime(value: DateInput, locale?: string): string {
@@ -75,13 +69,4 @@ export function formatShortDurationMs(ms: number): string {
   }
   const roundedYears = Math.round(years * 10) / 10;
   return `${roundedYears}y`;
-}
-
-export function formatAbsoluteTime(value: DateInput): string {
-  const date = parseDate(value);
-  if (!date) {
-    return "—";
-  }
-
-  return `${date.getFullYear()}-${padTwo(date.getMonth() + 1)}-${padTwo(date.getDate())} ${padTwo(date.getHours())}:${padTwo(date.getMinutes())}`;
 }

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { trackAnalyticsEvent } from "../analytics";
-import type { AnalyticsEventName } from "../analytics/types";
 
 export type UseAdminPageOptions<T> = {
   load: () => Promise<T>;
@@ -13,7 +12,7 @@ export type UseAdminPageOptions<T> = {
   resetErrorMessage?: string;
   saveSuccessMessage?: string;
   resetSuccessMessage?: string;
-  trackOpenEvent?: AnalyticsEventName;
+  trackOpenEvent?: string;
   trackOpenPayload?: Record<string, unknown>;
 };
 

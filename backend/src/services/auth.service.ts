@@ -18,6 +18,7 @@ import {
   createGuestUser,
   mergeGuestIntoUser,
 } from "./guest.service.js";
+import { getJwtSecret } from "../utils/optionalAuth.js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 8;
@@ -50,14 +51,6 @@ function userAuthRowToAuthUser(
     emailVerifiedAt: row.emailVerifiedAt,
     isGuest: row.isGuest,
   };
-}
-
-function getJwtSecret(): string {
-  const secret = process.env.AUTH_JWT_SECRET?.trim();
-  if (!secret) {
-    throw new Error("AUTH_JWT_SECRET is required");
-  }
-  return secret;
 }
 
 function getRefreshJwtSecret(): string {

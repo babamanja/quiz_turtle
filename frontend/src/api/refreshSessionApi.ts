@@ -1,9 +1,9 @@
 import { trackAnalyticsEvent } from "../analytics";
-import type { AuthMethod } from "../analytics/types";
 import type { AuthSession } from "../types";
-import { authBareClient } from "./authBareClient";
 
-function authMethodFromProviders(providers: AuthSession["providers"]): AuthMethod {
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
+function authMethodFromProviders(providers: AuthSession["providers"]): "password" | "google" {
   return providers.password ? "password" : "google";
 }
 
@@ -11,7 +11,6 @@ let inFlightRefresh: Promise<AuthSession> | null = null;
 
 /**
  * Exchanges httpOnly refresh cookie for a new access token + user (cookie rotated on server).
- * Never send or store refreshToken in JS — the browser attaches the cookie automatically.
  * Concurrent callers share one in-flight request to avoid rate-limit storms.
  */
 export async function refreshSession(): Promise<AuthSession> {
@@ -19,9 +18,16 @@ export async function refreshSession(): Promise<AuthSession> {
     return inFlightRefresh;
   }
 
-  inFlightRefresh = authBareClient
-    .post<AuthSession>("/auth/refresh")
-    .then(({ data }) => {
+  inFlightRefresh = fetch(`${API_BASE}/api/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error("refresh_failed");
+      }
+      const data = (await response.json()) as AuthSession;
       trackAnalyticsEvent("auth_refresh_succeeded", {
         auth_method: authMethodFromProviders(data.providers),
         flow: "refresh",

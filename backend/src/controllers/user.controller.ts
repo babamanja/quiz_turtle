@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import * as dictionaryService from "../services/dictionary.service.js";
 import * as userService from "../services/user.service.js";
 import * as vocabService from "../services/vocab.service.js";
-import { isValidReviewCardDirection } from "@vocab-bot/shared/vocabReviewCard";
+import { isValidReviewCardDirection } from "@language-turtle/shared";
 import {
   getRequiredUserId,
   sendServiceFailure,
@@ -20,13 +20,6 @@ function extractRequestId(req: Request): string | undefined {
     return candidate || undefined;
   }
   return undefined;
-}
-
-export async function createUserDeprecated(_req: Request, res: Response) {
-  return res.status(410).json({
-    error:
-      "POST /api/users is deprecated. Use authenticated endpoints GET /api/users/me and PATCH /api/users/me.",
-  });
 }
 
 export async function getCurrentUser(req: Request, res: Response) {

@@ -10,14 +10,14 @@ type CtaSectionProps = {
   onGetStarted: () => void
 }
 
-function PhoneMockup({ variant }: { variant: 'dashboard' | 'quiz' }) {
-  if (variant === 'quiz') {
+function PhoneMockup({ variant }: { variant: 'dashboard' | 'review' }) {
+  if (variant === 'review') {
     return (
-      <div className="qb-phone-mockup qb-phone-mockup--quiz" aria-hidden>
-        <div className="qb-phone-mockup__screen">
-          <p className="qb-phone-mockup__label">Quiz</p>
-          <p className="qb-phone-mockup__question">perro</p>
-          <ul className="qb-phone-mockup__options">
+      <div className="lt-phone-mockup lt-phone-mockup--review" aria-hidden>
+        <div className="lt-phone-mockup__screen">
+          <p className="lt-phone-mockup__label">Review</p>
+          <p className="lt-phone-mockup__question">perro</p>
+          <ul className="lt-phone-mockup__options">
             <li>dog</li>
             <li>cat</li>
             <li>bird</li>
@@ -29,16 +29,16 @@ function PhoneMockup({ variant }: { variant: 'dashboard' | 'quiz' }) {
   }
 
   return (
-    <div className="qb-phone-mockup qb-phone-mockup--dashboard" aria-hidden>
-      <div className="qb-phone-mockup__screen">
-        <div className="qb-phone-mockup__header">
-          <span className="qb-phone-mockup__avatar" />
+    <div className="lt-phone-mockup lt-phone-mockup--dashboard" aria-hidden>
+      <div className="lt-phone-mockup__screen">
+        <div className="lt-phone-mockup__header">
+          <span className="lt-phone-mockup__avatar" />
           <span>Today</span>
         </div>
-        <div className="qb-phone-mockup__progress">
+        <div className="lt-phone-mockup__progress">
           <span style={{ width: '72%' }} />
         </div>
-        <div className="qb-phone-mockup__stats">
+        <div className="lt-phone-mockup__stats">
           <div>
             <strong>24</strong>
             <span>words</span>
@@ -60,20 +60,20 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
   const appPath = homePathForRole(user?.role)
 
   return (
-    <section className="qb-cta" id="about" aria-labelledby="cta-section-title">
-      <div className="qb-cta__grid">
-        <div className="qb-cta__copy">
-          <div className="qb-section__head">
-            <h2 className="qb-heading--h2" id="cta-section-title">
+    <section className="lt-cta" id="about" aria-labelledby="cta-section-title">
+      <div className="lt-cta__grid">
+        <div className="lt-cta__copy">
+          <div className="lt-section__head">
+            <h2 className="lt-heading--h2" id="cta-section-title">
               {t('landing.ctaSection.title')}
             </h2>
-            <p className="qb-lead">{t('landing.ctaSection.subtitle')}</p>
+            <p className="lt-lead">{t('landing.ctaSection.subtitle')}</p>
           </div>
           <p>
             {isLoggedIn ? (
               <ButtonLink
                 to={appPath}
-                className="qb-cta__btn"
+                className="lt-cta__btn"
                 data-cta-id="landing_cta_go_to_app"
                 onClick={() => trackUiCtaClick('landing_cta_go_to_app')}
               >
@@ -81,7 +81,7 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
               </ButtonLink>
             ) : (
               <Button
-                className="qb-cta__btn"
+                className="lt-cta__btn"
                 data-cta-id="landing_cta_get_started"
                 onClick={() => {
                   trackUiCtaClick('landing_cta_get_started')
@@ -92,15 +92,15 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
               </Button>
             )}
           </p>
-          <p className="qb-hint">
+          <p className="lt-hint">
             {isLoggedIn
               ? t('landing.ctaSection.buttonHintLoggedIn')
               : t('landing.ctaSection.buttonHint')}
           </p>
         </div>
-        <div className="qb-cta__phones" aria-hidden>
+        <div className="lt-cta__phones" aria-hidden>
           <PhoneMockup variant="dashboard" />
-          <PhoneMockup variant="quiz" />
+          <PhoneMockup variant="review" />
         </div>
       </div>
     </section>

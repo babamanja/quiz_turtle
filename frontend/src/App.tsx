@@ -20,7 +20,8 @@ import AdminUserPairsPage from "./pages/admin/AdminUserPairsPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminWordsPage from "./pages/admin/AdminWordsPage";
 import AdminWordDetailPage from "./pages/admin/AdminWordDetailPage";
-import AdminTestComponentsPage from "./pages/admin/AdminTestComponentsPage";
+import AdminStoriesPage from "./pages/admin/AdminStoriesPage";
+import AdminStoryEditorPage from "./pages/admin/AdminStoryEditorPage";
 import AuthPage from "./pages/AuthPage";
 import LandingRoutePage from "./pages/landing/LandingRoutePage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -32,6 +33,8 @@ import PaymentResultPage from "./pages/payments/PaymentResultPage";
 import PaymentReturnPage from "./pages/payments/PaymentReturnPage";
 import ProfilePage from "./pages/ProfilePage";
 import FeedbackPage from "./pages/FeedbackPage";
+import StoriesPage from "./pages/stories/StoriesPage";
+import StoryReaderPage from "./pages/stories/StoryReaderPage";
 import UserDashboardPage from "./pages/UserDashboardPage";
 import WordsPage from "./pages/WordsPage";
 import WordDetailPage from "./pages/words/WordDetailPage";
@@ -56,13 +59,13 @@ const ROUTES: ReadonlyArray<RouteConfig> = [
   { path: "/admin/languages", element: <AdminLanguagesPage />, roles: ["admin"] },
   { path: "/admin/words", element: <AdminWordsPage />, roles: ["admin"] },
   { path: "/admin/words/:wordId", element: <AdminWordDetailPage />, roles: ["admin"] },
+  { path: "/admin/stories", element: <AdminStoriesPage />, roles: ["admin"] },
+  { path: "/admin/stories/:storyId", element: <AdminStoryEditorPage />, roles: ["admin"] },
   { path: "/admin/dictionaries", element: <Navigate to="/admin/translations" replace />, roles: ["admin"] },
   { path: "/admin/translations", element: <AdminTranslationsPage />, roles: ["admin"] },
   { path: "/admin/user-pairs", element: <AdminUserPairsPage />, roles: ["admin"] },
   { path: "/admin/quizzes", element: <Navigate to="/admin/user-pairs" replace />, roles: ["admin"] },
   { path: "/admin/ai-usage", element: <AdminTokenAnalyticsPage />, roles: ["admin"] },
-  { path: "/admin/test-components", element: <AdminTestComponentsPage />, roles: ["admin"] },
-  { path: "/test-components", element: <AdminTestComponentsPage />, roles: ["admin"] },
   { path: "/admin/token-analytics", element: <Navigate to="/admin/ai-usage" replace />, roles: ["admin"] },
   { path: "/my-subscription", element: <MySubscriptionPage />, roles: ["user"] },
   { path: "/payment/checkout", element: <PaymentCheckoutPage />, roles: ["user"] },
@@ -75,6 +78,8 @@ const ROUTES: ReadonlyArray<RouteConfig> = [
   { path: "/words/:vocabPairId", element: <WordDetailPage />, roles: ["user"] },
   { path: "/words/review", element: <Navigate to={USER_HOME_PATH} replace />, roles: ["user"] },
   { path: "/dictionaries", element: <MyDictionariesPage />, roles: ["user"] },
+  { path: "/stories", element: <StoriesPage />, roles: ["user"] },
+  { path: "/stories/:storyId", element: <StoryReaderPage />, roles: ["user"] },
   { path: "/profile", element: <ProfilePage />, roles: ["user"] },
   { path: "/feedback", element: <FeedbackPage />, roles: ["user"] },
   { path: "/payment", element: <PaymentReturnPage />, roles: ["user"] },

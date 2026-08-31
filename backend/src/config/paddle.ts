@@ -1,7 +1,5 @@
 export type PaddleEnvironment = "sandbox" | "live";
 
-export type PaddleCheckoutType = "subscription";
-
 export type SubscriptionBillingPeriod = "monthly" | "yearly";
 
 type PaddlePriceIds = {
@@ -9,7 +7,7 @@ type PaddlePriceIds = {
   subscription_1_year: string;
 };
 
-/** Paddle Billing API origins per environment. Override with `PADDLE_API_BASE_URL` if needed. */
+/** Paddle Billing API origins per environment. */
 export const PADDLE_API_BASE_URL_BY_ENV: Record<PaddleEnvironment, string> = {
   sandbox: "https://sandbox-api.paddle.com",
   live: "https://api.paddle.com",
@@ -43,10 +41,6 @@ export function getPaddleEnvironment(): PaddleEnvironment {
 }
 
 export function getPaddleApiBaseUrl(): string {
-  const override = process.env.PADDLE_API_BASE_URL?.trim();
-  if (override) {
-    return override.replace(/\/+$/, "");
-  }
   return PADDLE_API_BASE_URL_BY_ENV[getPaddleEnvironment()];
 }
 
@@ -67,15 +61,11 @@ function subscriptionPriceKey(
 }
 
 export function getPaddlePriceId(input: {
-  checkoutType: PaddleCheckoutType;
   planCode: "basic" | "premium";
   billingPeriod?: SubscriptionBillingPeriod;
 }): string {
   const prices = PADDLE_PRICE_IDS_BY_ENV[getPaddleEnvironment()];
 
-  if (input.checkoutType !== "subscription") {
-    throw new Error("unsupported checkoutType");
-  }
   if (input.planCode !== "premium") {
     throw new Error("unsupported planCode");
   }

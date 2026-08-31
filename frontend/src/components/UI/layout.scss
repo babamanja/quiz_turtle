@@ -159,34 +159,6 @@
   }
 }
 
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: $space-md;
-
-  &--row {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-
-  &--gap-sm {
-    gap: $space-sm;
-  }
-
-  &--gap-md {
-    gap: $space-md;
-  }
-
-  &--gap-lg {
-    gap: $space-lg;
-  }
-
-  &--gap-xl {
-    gap: $space-xl;
-  }
-}
-
 .page-toolbar {
   display: flex;
   flex-wrap: wrap;

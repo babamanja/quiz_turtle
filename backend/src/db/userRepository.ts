@@ -1,7 +1,11 @@
 import { Prisma } from "@prisma/client";
-import { resolvePairSidesForUser } from "@vocab-bot/shared/vocabPairRelation";
-import type { VocabPairRelationType } from "@vocab-bot/shared/vocabPairRelation";
-import { entryToPairSchedules, pairNextReviewMs, pairPimsleurLevel } from "@vocab-bot/shared/vocabReviewCard";
+import {
+  entryToPairSchedules,
+  pairNextReviewMs,
+  pairPimsleurLevel,
+  resolvePairSidesForUser,
+  type VocabPairRelationType,
+} from "@language-turtle/shared";
 import * as dictionaryRepository from "./dictionaryRepository.js";
 import { getPrisma } from "./prisma.js";
 

@@ -1,30 +1,25 @@
 import {
-  isVocabPairRelationType,
-  pairMatchesUserRelation,
-  resolvePairSidesForUser,
-  type VocabPairRelationType,
-} from "@vocab-bot/shared/vocabPairRelation";
-import {
-  collectNestAlternateTexts,
-  mergeVocabAlternateAnswers,
-  type NestMember,
-} from "@vocab-bot/shared/vocabNest";
-import * as nestRepository from "../db/nestRepository.js";
-import { evaluateVocabAnswer } from "@vocab-bot/shared/vocabReviewAnswer";
-import {
+  coerceReviewDirection,
   entryToPairSchedules,
+  evaluateVocabAnswer,
+  expectedAnswersForDirection,
+  initialDictionarySchedules,
+  isVocabPairRelationType,
+  normalizePartOfSpeechInput,
+  pairMatchesUserRelation,
+  planReviewScheduleUpdate,
+  resolvePairSidesForUser,
   selectWorstCardDirection,
+  type NestMember,
   type ReviewCardDirection,
-} from "@vocab-bot/shared/vocabReviewCard";
-import { normalizePartOfSpeechInput } from "@vocab-bot/shared/partOfSpeech";
+  type VocabPairRelationType,
+} from "@language-turtle/shared";
+import * as nestRepository from "../db/nestRepository.js";
 import * as userRepository from "../db/userRepository.js";
 import { getPrisma } from "../db/prisma.js";
 import * as dictionaryRepository from "../db/dictionaryRepository.js";
-import {
-  initialSchedule,
-  scheduleAfterCorrect,
-  scheduleAfterWrong,
-} from "../domain/pimsleur-schedule.js";
+import * as skillStateRepository from "../db/skillStateRepository.js";
+import { shuffleArray } from "../utils/shuffle.js";
 import {
   vocabPairIncludesPrimaryWordWhere,
 } from "../db/vocabPairRepository.js";
@@ -118,13 +113,11 @@ async function attachUserToVocabPair(
   pairId: number,
   nowMs: number = Date.now(),
 ): Promise<void> {
-  const schedule = initialSchedule(nowMs);
-  await dictionaryRepository.attachPairToUserDefaultDictionary(userId, pairId, {
-    pimsleurLevel: schedule.pimsleurLevel,
-    nextReviewMs: schedule.nextReviewMs,
-    pimsleurLevelReverse: schedule.pimsleurLevel,
-    nextReviewMsReverse: schedule.nextReviewMs,
-  });
+  await dictionaryRepository.attachPairToUserDefaultDictionary(
+    userId,
+    pairId,
+    initialDictionarySchedules(nowMs),
+  );
 }
 
 async function loadAddedWord(
@@ -346,50 +339,6 @@ function buildDueReviewWord(
   };
 }
 
-function resolveReviewDirection(
-  entry: {
-    pimsleurLevel: number;
-    nextReviewMs: bigint;
-    pimsleurLevelReverse: number;
-    nextReviewMsReverse: bigint;
-  },
-  direction?: ReviewCardDirection,
-): ReviewCardDirection {
-  const schedules = entryToPairSchedules(entry);
-  const worstDirection = selectWorstCardDirection(schedules);
-  if (direction != null && direction !== worstDirection) {
-    return worstDirection;
-  }
-  return direction ?? worstDirection;
-}
-
-function expectedAnswerForDirection(
-  direction: ReviewCardDirection,
-  primaryWord: string,
-  learningWord: string,
-  alternatePrimaryAnswers: string[],
-  alternateLearningAnswers: string[],
-  primaryNestMembers: NestMember[] = [],
-  learningNestMembers: NestMember[] = [],
-): { expected: string; alternates: string[] } {
-  if (direction === "learning_to_primary") {
-    return {
-      expected: primaryWord,
-      alternates: mergeVocabAlternateAnswers(
-        alternatePrimaryAnswers,
-        collectNestAlternateTexts(primaryNestMembers, primaryWord),
-      ),
-    };
-  }
-  return {
-    expected: learningWord,
-    alternates: mergeVocabAlternateAnswers(
-      alternateLearningAnswers,
-      collectNestAlternateTexts(learningNestMembers, learningWord),
-    ),
-  };
-}
-
 async function resolveLemmaWordIdsForEntry(
   vocabPair: {
     wordA: { id: number; text: string; languageId: number };
@@ -448,13 +397,6 @@ function mapLearningNestForDetail(
   }));
 }
 
-function shuffleInPlace<T>(items: T[]): void {
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [items[i], items[j]] = [items[j], items[i]];
-  }
-}
-
 export async function getDueWordsForReview(userId: number) {
   if (!Number.isInteger(userId) || userId < 1) {
     return { ok: false as const, status: 401, error: "unauthorized" };
@@ -488,10 +430,10 @@ export async function getDueWordsForReview(userId: number) {
     },
   });
 
-  shuffleInPlace(dueRows);
+  const shuffledDueRows = shuffleArray(dueRows);
   const words: DueReviewWord[] = [];
 
-  for (const row of dueRows) {
+  for (const row of shuffledDueRows) {
     const resolved = resolvePairSidesForUser(
       row.vocabPair.wordA,
       row.vocabPair.wordB,
@@ -549,7 +491,7 @@ export async function checkReviewAnswer(
     return { ok: false as const, status: 404, error: "pair_not_found" };
   }
 
-  const direction = resolveReviewDirection(entry, directionRaw);
+  const direction = coerceReviewDirection(entry, directionRaw);
   const lemmaIds = await resolveLemmaWordIdsForEntry(
     entry.vocabPair,
     languages.primaryLangId,
@@ -562,7 +504,7 @@ export async function checkReviewAnswer(
     lemmaIds.primaryWordId,
     lemmaIds.learningWordId,
   );
-  const { expected, alternates } = expectedAnswerForDirection(
+  const { expected, alternates } = expectedAnswersForDirection(
     direction,
     resolved.primaryWord.text,
     resolved.learningWord.text,
@@ -645,25 +587,12 @@ export async function applyReviewResult(
   }
 
   const nowMs = Date.now();
-  const direction = resolveReviewDirection(entry, directionRaw);
-  const schedules = entryToPairSchedules(entry);
-  const currentLevel =
-    direction === "learning_to_primary"
-      ? schedules.learningToPrimary.pimsleurLevel
-      : schedules.primaryToLearning.pimsleurLevel;
-  const schedule =
-    result === "know" ? scheduleAfterCorrect(currentLevel, nowMs) : scheduleAfterWrong(nowMs);
-
-  const updateData =
-    direction === "learning_to_primary"
-      ? {
-          pimsleurLevel: schedule.pimsleurLevel,
-          nextReviewMs: schedule.nextReviewMs,
-        }
-      : {
-          pimsleurLevelReverse: schedule.pimsleurLevel,
-          nextReviewMsReverse: schedule.nextReviewMs,
-        };
+  const { direction, schedule, updateData } = planReviewScheduleUpdate(
+    entry,
+    result,
+    nowMs,
+    directionRaw,
+  );
 
   await getPrisma().dictionaryEntry.update({
     where: {
@@ -674,6 +603,14 @@ export async function applyReviewResult(
     },
     data: updateData,
   });
+
+  await skillStateRepository.upsertSkillAfterReview(
+    userId,
+    vocabPairId,
+    direction,
+    schedule,
+    result,
+  );
 
   const resolved = resolvePairSidesForUser(
     entry.vocabPair.wordA,
@@ -692,7 +629,7 @@ export async function applyReviewResult(
     primaryWord: resolved.primaryWord.text,
     learningWord: resolved.learningWord.text,
     pimsleurLevel: schedule.pimsleurLevel,
-    nextReviewMs: Number(schedule.nextReviewMs),
+    nextReviewMs: schedule.nextReviewMs,
   };
 }
 

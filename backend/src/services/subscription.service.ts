@@ -1,6 +1,13 @@
 import * as subscriptionRepository from "../db/subscriptionRepository.js";
 import * as paymentRepository from "../db/paymentRepository.js";
-import * as paymentService from "./payment.service.js";
+import { createCheckoutSession } from "./paddleCheckout.service.js";
+import { handlePaddleWebhook as processPaddleWebhook } from "./paddleWebhook.service.js";
+import {
+  abandonPendingPayment,
+  getPaymentStatus,
+  resolvePaymentIdFromPaddleTransaction,
+  syncPaymentFromPaddle,
+} from "./paymentStatus.service.js";
 import {
   canCancelSubscription,
   canResumeSubscription,
@@ -88,22 +95,13 @@ export async function resumeMySubscription(userId: number) {
   return { ok: true as const, subscription: toSubscriptionView(updated) };
 }
 
-export async function activateMySubscription(
-  userId: number,
-  planCode: subscriptionRepository.SubscriptionPlanCode,
-) {
-  const subscription =
-    await subscriptionRepository.activateSubscriptionByUserId(userId, planCode);
-  return { ok: true as const, subscription: toSubscriptionView(subscription) };
-}
-
 export async function createMyCheckoutSession(
   userId: number,
   planCode: subscriptionRepository.SubscriptionPlanCode,
   appBaseUrl: string,
   billingPeriod?: unknown,
 ) {
-  return await paymentService.createCheckoutSession(
+  return await createCheckoutSession(
     userId,
     planCode,
     appBaseUrl,
@@ -116,7 +114,7 @@ export async function getMyPaymentStatus(
   paymentId: string,
   appBaseUrl: string,
 ) {
-  return await paymentService.getPaymentStatus(userId, paymentId, appBaseUrl);
+  return await getPaymentStatus(userId, paymentId, appBaseUrl);
 }
 
 export async function syncMyPaymentFromPaddle(
@@ -125,7 +123,7 @@ export async function syncMyPaymentFromPaddle(
   appBaseUrl: string,
   paddleTransactionId?: string | null,
 ) {
-  const result = await paymentService.syncPaymentFromPaddle(
+  const result = await syncPaymentFromPaddle(
     userId,
     paymentId,
     appBaseUrl,
@@ -141,7 +139,7 @@ export async function abandonMyPendingPayment(
   appBaseUrl: string,
   failureReason?: unknown,
 ) {
-  return await paymentService.abandonPendingPayment(
+  return await abandonPendingPayment(
     userId,
     paymentId,
     appBaseUrl,
@@ -153,7 +151,7 @@ export async function resolveMyPaymentFromPaddleTransaction(
   userId: number,
   paddleTransactionId: string,
 ) {
-  return await paymentService.resolvePaymentIdFromPaddleTransaction(
+  return await resolvePaymentIdFromPaddleTransaction(
     userId,
     paddleTransactionId,
   );
@@ -180,7 +178,7 @@ export async function handlePaddleWebhook(input: {
   rawBody: Buffer | string;
   signatureHeader: string;
 }) {
-  const result = await paymentService.handlePaddleWebhook(input);
+  const result = await processPaddleWebhook(input);
   await subscriptionRepository.downgradeExpiredCanceledPremium();
   return result;
 }
