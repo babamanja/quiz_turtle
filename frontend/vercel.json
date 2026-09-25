@@ -1,14 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm ci --include=optional",
-  "buildCommand": "node scripts/vercel-build.mjs",
-  "outputDirectory": "frontend/dist",
-  "functions": {
-    "api/index.ts": {
-      "maxDuration": 300,
-      "includeFiles": "backend/dist/**"
-    }
-  },
+  "installCommand": "cd .. && npm ci --include=optional",
+  "buildCommand": "cd .. && npm run build:frontend",
+  "outputDirectory": "dist",
   "headers": [
     {
       "source": "/((?!api/).*)",
@@ -30,11 +24,11 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "source": "/api/:path*",
+      "destination": "https://turtle.91.107.200.153.sslip.io/api/:path*"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ]

@@ -9,6 +9,7 @@ import {
   type WordSuggestion,
 } from "../../api/words";
 import Button from "../../components/UI/Button/Button";
+import ButtonLink from "../../components/UI/Button/ButtonLink";
 import Modal from "../../components/UI/Modal";
 import TextInput from "../../components/UI/TextInput";
 
@@ -65,8 +66,11 @@ export default function AddWordModal({ open, onClose, onAdded }: AddWordModalPro
         if (!isMounted) {
           return;
         }
+        setLanguages(null);
         setError(
-          loadError instanceof Error ? loadError.message : t("wordsPage.add.loadLanguagesFailed"),
+          loadError instanceof Error && loadError.message === "languages_not_set"
+            ? t("wordsPage.add.languagesNotSet")
+            : t("wordsPage.add.loadLanguagesFailed"),
         );
       })
       .finally(() => {
@@ -210,8 +214,13 @@ export default function AddWordModal({ open, onClose, onAdded }: AddWordModalPro
             {successMessage}
           </p>
         ) : null}
+        {!languages && error === t("wordsPage.add.languagesNotSet") ? (
+          <div className="add-word-modal__actions">
+            <ButtonLink to="/profile">{t("dashboard.user.setLanguages")}</ButtonLink>
+          </div>
+        ) : null}
 
-        {!successMessage && step === "primary" ? (
+        {!successMessage && step === "primary" && languages ? (
           <form onSubmit={handlePrimarySubmit}>
             <p className="add-word-modal__hint">
               {t("wordsPage.add.promptPrimary", { langName: primaryLangName })}

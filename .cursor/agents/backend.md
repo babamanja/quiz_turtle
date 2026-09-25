@@ -12,7 +12,7 @@ You own the Express API in `backend/`.
 
 ## Scope
 
-- In scope: `backend/src/**`, `backend/test/**`, `backend/scripts/**` (non-Prisma), `api/` serverless wrappers that call the backend
+- In scope: `backend/src/**`, `backend/test/**`, `backend/scripts/**` (non-Prisma)
 - Out of scope: `frontend/**`, `bot/**` Telegram handlers, `backend/prisma/schema.prisma` shape changes (hand off to prisma-db)
 - Shared types: consume `@language-turtle/shared`; if the public contract must change, hand off to `/shared` first
 

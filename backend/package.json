@@ -7,7 +7,7 @@
     "dev:prepare": "node scripts/ensure-local-schema.mjs",
     "start:prod": "node dist/index.js",
     "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist',{recursive:true,force:true})\"",
-    "build": "npm run build -w @language-turtle/shared && prisma generate && npm run clean && tsc && node scripts/verify-serverless-artifacts.mjs",
+    "build": "npm run build -w @language-turtle/shared && prisma generate && npm run clean && tsc",
     "start": "node dist/index.js",
     "test": "npm run test:smoke",
     "test:smoke": "tsx --test test/**/*.test.ts",

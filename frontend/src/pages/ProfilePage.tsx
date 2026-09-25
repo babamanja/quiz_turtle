@@ -245,16 +245,18 @@ export default function ProfilePage() {
             {t("profilePage.languagesMustDiffer")}
           </p>
         ) : null}
-        <Button
-          style="primary"
-          onClick={handleSaveProfile}
-          disabled={isSaving || isDeleting || !canSaveProfile}
-        >
-          {isSaving ? t("profilePage.saving") : t("profilePage.save")}
-        </Button>
-        <Button style="secondary" onClick={handleDeleteAccount} disabled={isSaving || isDeleting}>
-          {isDeleting ? t("profilePage.deleting") : t("profilePage.delete")}
-        </Button>
+        <div className="upload-file__actions">
+          <Button
+            style="primary"
+            onClick={handleSaveProfile}
+            disabled={isSaving || isDeleting || !canSaveProfile}
+          >
+            {isSaving ? t("profilePage.saving") : t("profilePage.save")}
+          </Button>
+          <Button style="danger" onClick={handleDeleteAccount} disabled={isSaving || isDeleting}>
+            {isDeleting ? t("profilePage.deleting") : t("profilePage.delete")}
+          </Button>
+        </div>
         {profileMessage && (
           <p className="upload-file__profile-hint" role="status">
             {profileMessage}

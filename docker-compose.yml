@@ -15,36 +15,5 @@ services:
       timeout: 5s
       retries: 20
 
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    env_file:
-      - env/.env
-    environment:
-      DATABASE_URL: postgresql://prisma:prisma@db:5432/language_turtle
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "3001:3001"
-    restart: unless-stopped
-
-  bot:
-    build:
-      context: .
-      dockerfile: bot/Dockerfile
-    env_file:
-      - env/.env
-    environment:
-      DATABASE_URL: postgresql://prisma:prisma@db:5432/language_turtle
-      BACKEND_INTERNAL_URL: http://backend:3001
-    depends_on:
-      db:
-        condition: service_healthy
-      backend:
-        condition: service_started
-    restart: unless-stopped
-
 volumes:
   postgres_data:

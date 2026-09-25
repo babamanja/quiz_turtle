@@ -153,6 +153,17 @@ a.button {
     }
   }
 
+  &--danger {
+    background: $color-error;
+    color: $color-surface;
+    border-color: transparent;
+
+    &:not(:disabled):hover {
+      background: $color-error-text;
+      box-shadow: $shadow-card-hover;
+    }
+  }
+
   &--borderless {
     min-height: auto;
     min-width: 0;

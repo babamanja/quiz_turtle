@@ -10,35 +10,33 @@ Telegram vocabulary bot (Language Turtle) with admin web panel and Paddle + Tele
 | `backend/` | Express API, Prisma, auth, billing, admin |
 | `frontend/` | React admin + user web (Vercel) |
 | `packages/shared/` | Shared constants (pricing, limits) |
-| `api/` | Vercel serverless entry |
 
 ## Local development
 
 1. Copy `env/.env.example` to `env/.env` and fill secrets.
-2. Start Postgres: `docker compose up db -d`
+2. Start Postgres: `docker compose up -d`
 3. Apply schema: `npm run db:migrate --prefix backend`
 4. Run services:
    - `npm run dev:backend`
    - `npm run dev:frontend`
    - `npm run dev:bot`
 
-## Deploy (Vercel)
+Or from the repo root: `npm run dev:all`
 
-Monorepo deploys from the **repository root**.
+## Deploy
+
+See [docs/HOSTING.md](docs/HOSTING.md): **Vercel** (SPA only) + shared Hetzner (Express + bot) + Neon.
 
 ### Vercel project settings
 
 | Setting | Value |
 |---------|--------|
-| **Root Directory** | *(empty — repository root)* |
-| **Framework Preset** | Other |
-| **Build Command** | **Override OFF** (empty) |
-| **Output Directory** | **Override OFF** (empty) |
-| **Install Command** | **Override OFF** (empty) |
+| **Root Directory** | `frontend` |
+| **Include files outside Root Directory** | ON |
+| **Framework Preset** | Vite |
+| **Build / Output / Install** | Override OFF (`frontend/vercel.json`) |
 
-Everything is driven by root `vercel.json`: `@vercel/static-build` for the Vite SPA, `@vercel/node` for `api/index.ts`.
-
-Set env vars from `backend/.env.example` and `frontend/.env.example` in the Vercel dashboard.
+Leave `VITE_API_BASE` empty. `/api` is rewritten to the Hetzner box.
 
 ## User identity
 

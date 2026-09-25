@@ -12,4 +12,3 @@ frontend/dist
 bot/node_modules
 bot/dist
 packages/shared/node_modules
-api/node_modules

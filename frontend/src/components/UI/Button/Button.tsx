@@ -5,7 +5,7 @@ import "../style.scss";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
-  style?: "primary" | "secondary" | "success" | "borderless";
+  style?: "primary" | "secondary" | "success" | "danger" | "borderless";
 };
 
 export default function Button({

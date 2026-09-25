@@ -1,6 +1,6 @@
 /**
  * CSP for the Vite SPA (static HTML/JS on Vercel).
- * Keep vercel.json Content-Security-Policy header in sync — see contentSecurityPolicy.test.ts.
+ * Keep frontend/vercel.json Content-Security-Policy header in sync — see contentSecurityPolicy.test.ts.
  */
 export function buildSpaContentSecurityPolicy(): string {
   const directives: Record<string, string[]> = {

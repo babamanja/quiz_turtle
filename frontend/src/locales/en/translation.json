@@ -59,7 +59,8 @@
       "subscriptionStatusCanceled": "Canceled",
       "subscriptionStatusPastDue": "Past due",
       "languagesValue": "Learning: {{primary}} → {{learning}}",
-      "languagesNotSet": "Set your languages in the Telegram bot to start adding words.",
+      "languagesNotSet": "Set your native and learning languages in Profile to start adding words.",
+      "setLanguages": "Set languages",
       "stats": {
         "vocabPairCount": "Words learning",
         "dictionaryCount": "Dictionaries",
@@ -673,7 +674,7 @@
       "success": "Added: {{primary}} — {{learning}} (pair #{{pairId}})",
       "failed": "Could not add word",
       "loadLanguagesFailed": "Could not load your languages",
-      "languagesNotSet": "Set your languages in the Telegram bot first (/setLangs).",
+      "languagesNotSet": "Set your languages in Profile first.",
       "primaryRequired": "Enter a word",
       "learningRequired": "Enter a translation",
       "pairNotFound": "Translation option not found"

@@ -12,6 +12,15 @@ import {
 const REFRESH_COOKIE_NAME = "languageTurtleRefreshToken";
 const REFRESH_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
+function refreshCookieOptions() {
+  return {
+    httpOnly: true as const,
+    sameSite: (process.env.COOKIE_SAMESITE === "none" ? "none" : "lax") as "lax" | "none",
+    secure: process.env.COOKIE_SECURE === "true" || (process.env.COOKIE_SECURE !== "false" && isProd()),
+    path: "/api/auth",
+  };
+}
+
 function readRefreshCookie(cookieHeader: string | undefined): string {
   if (!cookieHeader) {
     return "";
@@ -36,21 +45,13 @@ function readRefreshCookie(cookieHeader: string | undefined): string {
 
 function setRefreshCookie(res: Response, refreshToken: string) {
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: isProd(),
+    ...refreshCookieOptions(),
     maxAge: REFRESH_COOKIE_MAX_AGE_MS,
-    path: "/api/auth",
   });
 }
 
 function clearRefreshCookie(res: Response) {
-  res.clearCookie(REFRESH_COOKIE_NAME, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: isProd(),
-    path: "/api/auth",
-  });
+  res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
 }
 
 function extractRequestId(req: Request): string | undefined {

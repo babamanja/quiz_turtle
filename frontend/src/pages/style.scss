@@ -44,6 +44,14 @@
     font-weight: 600;
   }
 
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: $space-md;
+    margin-top: $space-md;
+  }
+
   &__textarea {
     width: 100%;
     padding: $space-md;

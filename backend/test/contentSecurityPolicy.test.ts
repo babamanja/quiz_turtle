@@ -9,15 +9,15 @@ import { buildSpaContentSecurityPolicy } from "@language-turtle/shared";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 function readVercelSpaCsp(): string {
-  const vercel = JSON.parse(readFileSync(resolve(repoRoot, "vercel.json"), "utf8")) as {
+  const vercel = JSON.parse(readFileSync(resolve(repoRoot, "frontend/vercel.json"), "utf8")) as {
     headers?: Array<{ source?: string; headers?: Array<{ key?: string; value?: string }> }>;
   };
   const spaHeaders = vercel.headers?.find((entry) => entry.source?.includes("api"));
   const csp = spaHeaders?.headers?.find((header) => header.key === "Content-Security-Policy");
-  assert.ok(csp?.value, "vercel.json must define Content-Security-Policy for SPA routes");
+  assert.ok(csp?.value, "frontend/vercel.json must define Content-Security-Policy for SPA routes");
   return csp.value;
 }
 
-test("vercel.json SPA CSP matches shared policy builder", () => {
+test("frontend/vercel.json SPA CSP matches shared policy builder", () => {
   assert.equal(readVercelSpaCsp(), buildSpaContentSecurityPolicy());
 });
