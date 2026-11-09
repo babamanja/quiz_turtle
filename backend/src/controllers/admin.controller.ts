@@ -8,6 +8,7 @@ import * as translationService from "../services/translation.service.js";
 import * as vocabWordService from "../services/vocabWord.service.js";
 import {
   getRequiredUserId,
+  getTaughtLanguageIds,
   sendServiceFailure,
   sendUnauthorized,
 } from "./helpers.js";
@@ -58,6 +59,15 @@ export async function getUserDetails(req: Request, res: Response) {
     return sendServiceFailure(res, result);
   }
   return res.status(200).json(result.user);
+}
+
+export async function setUserTaughtLanguages(req: Request, res: Response) {
+  const userId = Number(req.params?.userId);
+  const result = await adminService.setUserTaughtLanguages(userId, req.body?.languageIds);
+  if (result.ok === false) {
+    return sendServiceFailure(res, result);
+  }
+  return res.status(200).json({ taughtLanguageIds: result.taughtLanguageIds });
 }
 
 export async function grantPremiumSubscription(req: Request, res: Response) {
@@ -226,6 +236,7 @@ export async function listVocabWords(req: Request, res: Response) {
     sortOrder,
     search,
     languageId,
+    languageIds: getTaughtLanguageIds(req),
   });
   return res
     .status(200)
@@ -234,10 +245,14 @@ export async function listVocabWords(req: Request, res: Response) {
 
 export async function createVocabWord(req: Request, res: Response) {
   const body = req.body ?? {};
-  const result = await vocabWordService.createVocabWord({
-    text: body.text,
-    languageId: body.languageId,
-  });
+  const result = await vocabWordService.createVocabWord(
+    {
+      text: body.text,
+      languageId: body.languageId,
+    },
+    getTaughtLanguageIds(req),
+    getRequiredUserId(req) ?? 0,
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -246,7 +261,10 @@ export async function createVocabWord(req: Request, res: Response) {
 
 export async function getVocabWord(req: Request, res: Response) {
   const wordId = Number(req.params?.wordId);
-  const result = await vocabWordService.getVocabWordDetail(wordId);
+  const result = await vocabWordService.getVocabWordDetail(
+    wordId,
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -259,12 +277,16 @@ export async function updateVocabWord(req: Request, res: Response) {
     return res.status(400).json({ error: "invalid word id" });
   }
   const body = req.body ?? {};
-  const result = await vocabWordService.updateVocabWord(wordId, {
-    text: body.text,
-    languageId: body.languageId,
-    partOfSpeech: body.partOfSpeech,
-    tagIds: body.tagIds,
-  });
+  const result = await vocabWordService.updateVocabWord(
+    wordId,
+    {
+      text: body.text,
+      languageId: body.languageId,
+      partOfSpeech: body.partOfSpeech,
+      tagIds: body.tagIds,
+    },
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -276,7 +298,7 @@ export async function deleteVocabWord(req: Request, res: Response) {
   if (!Number.isInteger(wordId) || wordId < 1) {
     return res.status(400).json({ error: "invalid word id" });
   }
-  const result = await vocabWordService.deleteVocabWord(wordId);
+  const result = await vocabWordService.deleteVocabWord(wordId, getTaughtLanguageIds(req));
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -286,7 +308,11 @@ export async function deleteVocabWord(req: Request, res: Response) {
 export async function addVocabWordNestMember(req: Request, res: Response) {
   const wordId = Number(req.params?.wordId);
   const body = req.body ?? {};
-  const result = await vocabWordService.addNestMemberToVocabWord(wordId, body.form);
+  const result = await vocabWordService.addNestMemberToVocabWord(
+    wordId,
+    body.form,
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -296,7 +322,11 @@ export async function addVocabWordNestMember(req: Request, res: Response) {
 export async function removeVocabWordNestMember(req: Request, res: Response) {
   const wordId = Number(req.params?.wordId);
   const memberWordId = Number(req.params?.memberWordId);
-  const result = await vocabWordService.removeNestMemberFromVocabWord(wordId, memberWordId);
+  const result = await vocabWordService.removeNestMemberFromVocabWord(
+    wordId,
+    memberWordId,
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -328,6 +358,7 @@ export async function listDictionaries(req: Request, res: Response) {
     sortBy,
     sortOrder,
     search,
+    learningLanguageIds: getTaughtLanguageIds(req),
   });
   return res
     .status(200)
@@ -361,6 +392,7 @@ export async function listTranslations(req: Request, res: Response) {
     search,
     primaryLanguageId,
     tagId,
+    learningLanguageIds: getTaughtLanguageIds(req),
   });
   return res
     .status(200)
@@ -372,7 +404,10 @@ export async function getTranslation(req: Request, res: Response) {
   if (!Number.isInteger(translationId) || translationId < 1) {
     return res.status(400).json({ error: "invalid translation id" });
   }
-  const result = await translationService.getTranslation(translationId);
+  const result = await translationService.getTranslation(
+    translationId,
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -380,6 +415,10 @@ export async function getTranslation(req: Request, res: Response) {
 }
 
 export async function createTranslation(req: Request, res: Response) {
+  const authorId = getRequiredUserId(req);
+  if (authorId == null) {
+    return sendUnauthorized(res);
+  }
   const body = req.body ?? {};
   const payload = {
     primaryLanguageId: body.primaryLanguageId,
@@ -392,11 +431,15 @@ export async function createTranslation(req: Request, res: Response) {
   };
 
   if (Array.isArray(body.rows)) {
-    const result = await translationService.createTranslationRows({
-      primaryLanguageId: body.primaryLanguageId,
-      learningLanguageId: body.learningLanguageId,
-      rows: body.rows,
-    });
+    const result = await translationService.createTranslationRows(
+      {
+        primaryLanguageId: body.primaryLanguageId,
+        learningLanguageId: body.learningLanguageId,
+        rows: body.rows,
+      },
+      getTaughtLanguageIds(req),
+      authorId,
+    );
     if (result.ok === false) {
       return sendServiceFailure(res, result);
     }
@@ -407,7 +450,11 @@ export async function createTranslation(req: Request, res: Response) {
   }
 
   if (Array.isArray(body.learningTexts)) {
-    const result = await translationService.createTranslations(payload);
+    const result = await translationService.createTranslations(
+      payload,
+      getTaughtLanguageIds(req),
+      authorId,
+    );
     if (result.ok === false) {
       return sendServiceFailure(res, result);
     }
@@ -417,7 +464,11 @@ export async function createTranslation(req: Request, res: Response) {
     });
   }
 
-  const result = await translationService.createTranslation(payload);
+  const result = await translationService.createTranslation(
+    payload,
+    getTaughtLanguageIds(req),
+    authorId,
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -429,7 +480,10 @@ export async function deleteTranslation(req: Request, res: Response) {
   if (!Number.isInteger(translationId) || translationId < 1) {
     return res.status(400).json({ error: "invalid translation id" });
   }
-  const result = await translationService.deleteTranslation(translationId);
+  const result = await translationService.deleteTranslation(
+    translationId,
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -442,14 +496,18 @@ export async function updateTranslation(req: Request, res: Response) {
     return res.status(400).json({ error: "invalid translation id" });
   }
   const body = req.body ?? {};
-  const result = await translationService.updateTranslation(translationId, {
-    primaryLanguageId: body.primaryLanguageId,
-    primaryText: body.primaryText,
-    learningLanguageId: body.learningLanguageId,
-    learningText: body.learningText,
-    tagIds: body.tagIds,
-    partOfSpeech: body.partOfSpeech,
-  });
+  const result = await translationService.updateTranslation(
+    translationId,
+    {
+      primaryLanguageId: body.primaryLanguageId,
+      primaryText: body.primaryText,
+      learningLanguageId: body.learningLanguageId,
+      learningText: body.learningText,
+      tagIds: body.tagIds,
+      partOfSpeech: body.partOfSpeech,
+    },
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }

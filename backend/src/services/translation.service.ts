@@ -2,7 +2,9 @@ import * as languageRepository from "../db/languageRepository.js";
 import * as tagRepository from "../db/tagRepository.js";
 import * as vocabPairRepository from "../db/vocabPairRepository.js";
 import * as vocabWordRepository from "../db/vocabWordRepository.js";
+import { getPrisma } from "../db/prisma.js";
 import { normalizePartOfSpeechInput } from "@language-turtle/shared";
+import { taughtLanguageDenied } from "./teacherScope.js";
 
 const MAX_WORD_TEXT_LENGTH = 200;
 
@@ -92,7 +94,10 @@ function parseOptionalPartOfSpeech(
   return { ok: true, partOfSpeech };
 }
 
-async function resolveTranslationWords(input: TranslationWordInput) {
+async function resolveTranslationWords(
+  input: TranslationWordInput,
+  taughtLanguageIds: readonly number[],
+) {
   const primaryText = normalizeWordText(input.primaryText);
   const learningText = normalizeWordText(input.learningText);
   if (!primaryText || !learningText) {
@@ -103,6 +108,10 @@ async function resolveTranslationWords(input: TranslationWordInput) {
   const learningLanguageId = parseLanguageId(input.learningLanguageId);
   if (!primaryLanguageId || !learningLanguageId) {
     return { ok: false as const, status: 400, error: "invalid language id" };
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, learningLanguageId);
+  if (denied) {
+    return denied;
   }
 
   if (primaryLanguageId === learningLanguageId) {
@@ -164,8 +173,12 @@ async function resolveTranslationWords(input: TranslationWordInput) {
   };
 }
 
-export async function createTranslation(input: TranslationWordInput) {
-  const resolved = await resolveTranslationWords(input);
+export async function createTranslation(
+  input: TranslationWordInput,
+  taughtLanguageIds: readonly number[],
+  authorId: number,
+) {
+  const resolved = await resolveTranslationWords(input, taughtLanguageIds);
   if (resolved.ok === false) {
     return resolved;
   }
@@ -188,6 +201,10 @@ export async function createTranslation(input: TranslationWordInput) {
     primaryLanguageId: resolved.primaryLanguageId,
     learningLanguageId: resolved.learningLanguageId,
     partOfSpeech: resolved.partOfSpeech ?? null,
+  });
+  await getPrisma().vocabPair.update({
+    where: { id: row.id },
+    data: { authorId, publishedAt: new Date(), verifiedAt: new Date() },
   });
 
   const translation = await applyTranslationTags(row.id, resolved.tagIds);
@@ -246,6 +263,8 @@ export type TranslationBatchSkip = {
 
 export async function createTranslations(
   input: TranslationWordInput & { learningTexts?: unknown },
+  taughtLanguageIds: readonly number[],
+  authorId: number,
 ) {
   const parsedTexts = parseLearningTextsList(input.learningTexts, input.learningText);
   if (parsedTexts.ok === false) {
@@ -256,10 +275,14 @@ export async function createTranslations(
   const skipped: TranslationBatchSkip[] = [];
 
   for (const learningText of parsedTexts.learningTexts) {
-    const result = await createTranslation({
-      ...input,
-      learningText,
-    });
+    const result = await createTranslation(
+      {
+        ...input,
+        learningText,
+      },
+      taughtLanguageIds,
+      authorId,
+    );
     if (result.ok) {
       created.push(result.translation);
       continue;
@@ -357,15 +380,23 @@ function parseTranslationRows(
   return { ok: true, rows };
 }
 
-export async function createTranslationRows(input: {
-  primaryLanguageId: unknown;
-  learningLanguageId: unknown;
-  rows: unknown;
-}) {
+export async function createTranslationRows(
+  input: {
+    primaryLanguageId: unknown;
+    learningLanguageId: unknown;
+    rows: unknown;
+  },
+  taughtLanguageIds: readonly number[],
+  authorId: number,
+) {
   const primaryLanguageId = parseLanguageId(input.primaryLanguageId);
   const learningLanguageId = parseLanguageId(input.learningLanguageId);
   if (!primaryLanguageId || !learningLanguageId) {
     return { ok: false as const, status: 400, error: "invalid language id" };
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, learningLanguageId);
+  if (denied) {
+    return denied;
   }
 
   if (primaryLanguageId === learningLanguageId) {
@@ -402,14 +433,18 @@ export async function createTranslationRows(input: {
       continue;
     }
 
-    const result = await createTranslation({
-      primaryLanguageId,
-      learningLanguageId,
-      primaryText: row.primaryText,
-      learningText: row.learningText,
-      tagIds: row.tagIds,
-      partOfSpeech: row.partOfSpeech,
-    });
+    const result = await createTranslation(
+      {
+        primaryLanguageId,
+        learningLanguageId,
+        primaryText: row.primaryText,
+        learningText: row.learningText,
+        tagIds: row.tagIds,
+        partOfSpeech: row.partOfSpeech,
+      },
+      taughtLanguageIds,
+      authorId,
+    );
 
     if (result.ok) {
       created.push(result.translation);
@@ -438,7 +473,10 @@ export async function createTranslationRows(input: {
   };
 }
 
-export async function deleteTranslation(translationId: number) {
+export async function deleteTranslation(
+  translationId: number,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(translationId) || translationId < 1) {
     return { ok: false as const, status: 400, error: "invalid translation id" };
   }
@@ -446,6 +484,13 @@ export async function deleteTranslation(translationId: number) {
   const existing = await vocabPairRepository.selectTranslationById(translationId);
   if (!existing) {
     return { ok: false as const, status: 404, error: "translation not found" };
+  }
+  const denied = taughtLanguageDenied(
+    taughtLanguageIds,
+    existing.learningLanguageId ?? existing.wordB.languageId,
+  );
+  if (denied) {
+    return denied;
   }
 
   if (existing._count.dictionaryEntries > 0) {
@@ -460,7 +505,11 @@ export async function deleteTranslation(translationId: number) {
   return { ok: true as const };
 }
 
-export async function updateTranslation(translationId: number, input: TranslationWordInput) {
+export async function updateTranslation(
+  translationId: number,
+  input: TranslationWordInput,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(translationId) || translationId < 1) {
     return { ok: false as const, status: 400, error: "invalid translation id" };
   }
@@ -469,8 +518,15 @@ export async function updateTranslation(translationId: number, input: Translatio
   if (!existing) {
     return { ok: false as const, status: 404, error: "translation not found" };
   }
+  const deniedExisting = taughtLanguageDenied(
+    taughtLanguageIds,
+    existing.learningLanguageId ?? existing.wordB.languageId,
+  );
+  if (deniedExisting) {
+    return deniedExisting;
+  }
 
-  const resolved = await resolveTranslationWords(input);
+  const resolved = await resolveTranslationWords(input, taughtLanguageIds);
   if (resolved.ok === false) {
     return resolved;
   }
@@ -506,7 +562,10 @@ export async function updateTranslation(translationId: number, input: Translatio
   };
 }
 
-export async function getTranslation(translationId: number) {
+export async function getTranslation(
+  translationId: number,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(translationId) || translationId < 1) {
     return { ok: false as const, status: 400, error: "invalid translation id" };
   }
@@ -514,6 +573,13 @@ export async function getTranslation(translationId: number) {
   const row = await vocabPairRepository.selectTranslationById(translationId);
   if (!row) {
     return { ok: false as const, status: 404, error: "translation not found" };
+  }
+  const denied = taughtLanguageDenied(
+    taughtLanguageIds,
+    row.learningLanguageId ?? row.wordB.languageId,
+  );
+  if (denied) {
+    return denied;
   }
 
   return {

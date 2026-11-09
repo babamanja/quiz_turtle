@@ -18,6 +18,10 @@ export function getUserRole(req: Request): string {
   return typeof req.user?.role === "string" ? req.user.role : "user";
 }
 
+export function getTaughtLanguageIds(req: Request): number[] {
+  return req.user?.taughtLanguageIds ?? [];
+}
+
 export function sendUnauthorized(res: Response) {
   return res.status(401).json({ error: "unauthorized" });
 }

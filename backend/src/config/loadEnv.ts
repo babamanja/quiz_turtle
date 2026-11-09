@@ -11,6 +11,7 @@ export type { AppEnv } from "./appEnv.js";
 const moduleDir = dirname(fileURLToPath(import.meta.url));
 const envDir = resolve(moduleDir, "../../../env");
 const backendEnvPath = resolve(moduleDir, "../../.env");
+const repoEnvPath = resolve(moduleDir, "../../../.env");
 
 function syncViteGoogleClientId(): void {
   if (!process.env.VITE_GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_ID?.trim()) {
@@ -63,13 +64,17 @@ export function loadEnv(mode?: string): AppEnv {
     }
   }
 
-  if (existsSync(backendEnvPath)) {
-    const parsed = config({ path: backendEnvPath, processEnv: {} });
-    if (parsed.parsed) {
-      for (const [key, value] of Object.entries(parsed.parsed)) {
-        if (process.env[key] === undefined) {
-          process.env[key] = value;
-        }
+  for (const path of [backendEnvPath, repoEnvPath]) {
+    if (!existsSync(path)) {
+      continue;
+    }
+    const parsed = config({ path, processEnv: {} });
+    if (!parsed.parsed) {
+      continue;
+    }
+    for (const [key, value] of Object.entries(parsed.parsed)) {
+      if (process.env[key] === undefined) {
+        process.env[key] = value;
       }
     }
   }

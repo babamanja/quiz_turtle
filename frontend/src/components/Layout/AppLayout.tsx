@@ -4,13 +4,21 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { logOut, resendVerificationEmail } from "../../api/auth";
 import { getMySubscription, type MySubscription } from "../../api/subscription";
+import {
+  activeAppMode,
+  homePathForMode,
+  modesForUser,
+  setAppMode,
+  subscribeAppMode,
+  type AppMode,
+} from "../../appMode";
 import { MEDIA_MOBILE } from "../../constants/breakpoints";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import {
   ADMIN_STORIES_PATH,
+  ADMIN_WORDS_PATH,
   DICTIONARIES_PATH,
   FEEDBACK_PATH,
-  homePathForRole,
   STORIES_PATH,
   USER_HOME_PATH,
   WORDS_PATH,
@@ -44,12 +52,48 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { to: "/admin/feedback", labelKey: "nav.adminFeedback" },
   { to: "/admin/tags", labelKey: "nav.adminTags" },
   { to: "/admin/languages", labelKey: "nav.adminLanguages" },
-  { to: "/admin/words", labelKey: "nav.adminWords" },
-  { to: ADMIN_STORIES_PATH, labelKey: "nav.adminStories" },
-  { to: "/admin/translations", labelKey: "nav.adminTranslations" },
   { to: "/admin/user-pairs", labelKey: "nav.adminUserPairs" },
   { to: "/admin/ai-usage", labelKey: "nav.adminAiUsage" },
 ];
+
+const TEACHER_NAV_ITEMS: NavItem[] = [
+  { to: "/admin/review", labelKey: "nav.teacherReview" },
+  { to: ADMIN_WORDS_PATH, labelKey: "nav.adminWords" },
+  { to: ADMIN_STORIES_PATH, labelKey: "nav.adminStories" },
+  { to: "/admin/translations", labelKey: "nav.adminTranslations" },
+];
+
+function ModeSwitch({
+  modes,
+  active,
+  onSelect,
+}: {
+  modes: AppMode[];
+  active: AppMode;
+  onSelect: (mode: AppMode) => void;
+}) {
+  const { t } = useTranslation();
+  if (modes.length < 2) {
+    return null;
+  }
+  return (
+    <div className="app-mode-switch" role="group" aria-label={t("nav.modeSwitch")}>
+      {modes.map((mode) => (
+        <button
+          key={mode}
+          type="button"
+          className={`app-mode-switch__button${
+            mode === active ? " app-mode-switch__button--active" : ""
+          }`}
+          aria-pressed={mode === active}
+          onClick={() => onSelect(mode)}
+        >
+          {t(`nav.mode.${mode}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function AppLayout() {
   const { t } = useTranslation();
@@ -59,10 +103,17 @@ export default function AppLayout() {
   const isMobile = useMediaQuery(MEDIA_MOBILE);
   const [menuOpen, setMenuOpen] = useState(false);
   const [, setSessionVersion] = useState(0);
+  const [, setModeVersion] = useState(0);
 
   useEffect(() => {
     return subscribeToSession(() => {
       setSessionVersion((value) => value + 1);
+    });
+  }, []);
+
+  useEffect(() => {
+    return subscribeAppMode(() => {
+      setModeVersion((value) => value + 1);
     });
   }, []);
 
@@ -94,9 +145,15 @@ export default function AppLayout() {
   }, [menuOpen]);
 
   const user = getStoredUser();
-  const isAdmin = (user?.role ?? "").toLowerCase() === "admin";
-  const brandHomePath = homePathForRole(user?.role);
-  const navItems = isAdmin ? ADMIN_NAV_ITEMS : USER_NAV_ITEMS;
+  const modes = modesForUser(user);
+  const activeMode = activeAppMode(user);
+  const brandHomePath = homePathForMode(activeMode);
+  const navItems =
+    activeMode === "admin"
+      ? ADMIN_NAV_ITEMS
+      : activeMode === "teacher"
+        ? TEACHER_NAV_ITEMS
+        : USER_NAV_ITEMS;
   const [planCode, setPlanCode] = useState<MySubscription["effectivePlanCode"] | null>(
     null,
   );
@@ -123,6 +180,12 @@ export default function AppLayout() {
   }, [location.pathname]);
 
   const closeMenu = () => setMenuOpen(false);
+
+  function selectMode(mode: AppMode) {
+    setAppMode(mode);
+    navigate(homePathForMode(mode));
+    closeMenu();
+  }
 
   async function handleLogOut() {
     closeMenu();
@@ -159,6 +222,7 @@ export default function AppLayout() {
           <img className="app-brand__icon" src="/landing/logo-icon.png" alt="" width={28} height={28} />
           <span className="app-topbar__title">{t("nav.brandTitle")}</span>
         </NavLink>
+        <ModeSwitch modes={modes} active={activeMode} onSelect={selectMode} />
         <button
           type="button"
           className={`app-topbar__burger${menuOpen ? " app-topbar__burger--open" : ""}`}
@@ -207,6 +271,7 @@ export default function AppLayout() {
             </div>
           </div>
         </NavLink>
+        <ModeSwitch modes={modes} active={activeMode} onSelect={selectMode} />
         <nav className="app-nav">
           <ul className="app-nav__list">
             {navItems.map(({ to, labelKey, end }) => (

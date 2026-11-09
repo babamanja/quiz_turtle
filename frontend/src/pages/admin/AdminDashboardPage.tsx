@@ -21,9 +21,6 @@ const LINKS: AdminDashboardLink[] = [
   { to: "/admin/feedback", titleKey: "dashboard.admin.links.feedback.title", descKey: "dashboard.admin.links.feedback.desc" },
   { to: "/admin/tags", titleKey: "dashboard.admin.links.tags.title", descKey: "dashboard.admin.links.tags.desc" },
   { to: "/admin/languages", titleKey: "dashboard.admin.links.languages.title", descKey: "dashboard.admin.links.languages.desc" },
-  { to: "/admin/words", titleKey: "dashboard.admin.links.words.title", descKey: "dashboard.admin.links.words.desc" },
-  { to: "/admin/stories", titleKey: "dashboard.admin.links.stories.title", descKey: "dashboard.admin.links.stories.desc" },
-  { to: "/admin/translations", titleKey: "dashboard.admin.links.translations.title", descKey: "dashboard.admin.links.translations.desc" },
   { to: "/admin/ai-usage", titleKey: "dashboard.admin.links.aiUsage.title", descKey: "dashboard.admin.links.aiUsage.desc" },
 ];
 

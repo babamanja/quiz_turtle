@@ -21,7 +21,14 @@ export const storyPath = (storyId: number) => `/stories/${storyId}`;
 export const ADMIN_STORIES_PATH = "/admin/stories";
 export const adminStoryPath = (storyId: number) => `/admin/stories/${storyId}`;
 
-/** Post-login home and sidebar brand target by role. */
-export function homePathForRole(role: string | undefined): string {
-  return (role ?? "").toLowerCase() === "admin" ? "/admin/dashboard" : USER_HOME_PATH;
+import { activeAppMode, homePathForMode, type AppMode } from "./appMode";
+import type { User } from "./types";
+
+/** Post-login home and sidebar brand target for the active mode. */
+export function homePathForUser(
+  user: Pick<User, "role" | "isGuest" | "taughtLanguageIds"> | null | undefined,
+): string {
+  return homePathForMode(activeAppMode(user));
 }
+
+export type { AppMode };

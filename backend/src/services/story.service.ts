@@ -15,6 +15,7 @@ import type {
   StorySentenceInsert,
   StoryUnlockLevelInsert,
 } from "../db/storyRepository.js";
+import { taughtLanguageDenied } from "./teacherScope.js";
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_SLUG_LENGTH = 120;
@@ -454,6 +455,7 @@ export async function listAdminStories(input: {
   status?: unknown;
   page: number;
   pageSize: number;
+  learningLanguageIds: readonly number[];
 }) {
   let status: StoryStatus | undefined;
   if (input.status !== undefined && input.status !== "") {
@@ -467,6 +469,7 @@ export async function listAdminStories(input: {
     status,
     page: input.page,
     pageSize: input.pageSize,
+    learningLanguageIds: [...input.learningLanguageIds],
   });
 
   return {
@@ -492,13 +495,18 @@ export async function listAdminStories(input: {
   };
 }
 
-export async function createAdminStory(input: {
-  title: unknown;
-  primaryLanguageId: unknown;
-  learningLanguageId: unknown;
-  status?: unknown;
-  slug?: unknown;
-}) {
+export async function createAdminStory(
+  input: {
+    title: unknown;
+    primaryLanguageId: unknown;
+    learningLanguageId: unknown;
+    status?: unknown;
+    slug?: unknown;
+    authorId?: number;
+    verifiedAt?: Date | null;
+  },
+  taughtLanguageIds: readonly number[],
+) {
   const title = normalizeTitle(input.title);
   if (!title) {
     return failure(400, "title is required");
@@ -511,6 +519,10 @@ export async function createAdminStory(input: {
   const learningLanguageId = parsePositiveInt(input.learningLanguageId);
   if (learningLanguageId == null) {
     return failure(400, "invalid learning language id");
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, learningLanguageId);
+  if (denied) {
+    return denied;
   }
 
   let status: StoryStatus = "draft";
@@ -544,18 +556,27 @@ export async function createAdminStory(input: {
     primaryLanguageId,
     learningLanguageId,
     status,
+    authorId: input.authorId ?? null,
+    verifiedAt: input.verifiedAt ?? null,
   });
 
   return { ok: true as const, story: mapStoryGraph(story) };
 }
 
-export async function getAdminStory(storyId: number) {
+export async function getAdminStory(
+  storyId: number,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return failure(400, "invalid story id");
   }
   const story = await storyRepository.selectStoryById(storyId);
   if (!story) {
     return failure(404, "story not found");
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, story.learningLanguageId);
+  if (denied) {
+    return denied;
   }
   return { ok: true as const, story: mapStoryGraph(story) };
 }
@@ -569,6 +590,7 @@ export async function updateAdminStory(
     status?: unknown;
     slug?: unknown;
   },
+  taughtLanguageIds: readonly number[],
 ) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return failure(400, "invalid story id");
@@ -577,6 +599,10 @@ export async function updateAdminStory(
   const existing = await storyRepository.selectStoryById(storyId);
   if (!existing) {
     return failure(404, "story not found");
+  }
+  const deniedExisting = taughtLanguageDenied(taughtLanguageIds, existing.learningLanguageId);
+  if (deniedExisting) {
+    return deniedExisting;
   }
 
   const data: {
@@ -619,6 +645,10 @@ export async function updateAdminStory(
     if (learningLanguageId == null) {
       return failure(400, "invalid learning language id");
     }
+    const deniedNext = taughtLanguageDenied(taughtLanguageIds, learningLanguageId);
+    if (deniedNext) {
+      return deniedNext;
+    }
     data.learningLanguageId = learningLanguageId;
   }
 
@@ -649,19 +679,30 @@ export async function updateAdminStory(
   return { ok: true as const, story: mapStoryGraph(story) };
 }
 
-export async function deleteAdminStory(storyId: number) {
+export async function deleteAdminStory(
+  storyId: number,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return failure(400, "invalid story id");
   }
   const existing = await storyRepository.selectStoryById(storyId);
   if (!existing) {
     return failure(404, "story not found");
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, existing.learningLanguageId);
+  if (denied) {
+    return denied;
   }
   await storyRepository.deleteStoryById(storyId);
   return { ok: true as const };
 }
 
-export async function replaceAdminStoryContent(storyId: number, input: unknown) {
+export async function replaceAdminStoryContent(
+  storyId: number,
+  input: unknown,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return failure(400, "invalid story id");
   }
@@ -669,6 +710,10 @@ export async function replaceAdminStoryContent(storyId: number, input: unknown) 
   const existing = await storyRepository.selectStoryById(storyId);
   if (!existing) {
     return failure(404, "story not found");
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, existing.learningLanguageId);
+  if (denied) {
+    return denied;
   }
 
   const parsed = validateStoryContent(input);

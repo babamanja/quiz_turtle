@@ -8,7 +8,8 @@ import {
   selectWorstCardDirection,
 } from "@language-turtle/shared";
 
-import { getMyWord, type NestMemberView, type UserWordDetail } from "../../api/words";
+import { getMyWord, publishMyWord, type NestMemberView, type UserWordDetail } from "../../api/words";
+import Button from "../../components/UI/Button/Button";
 import ButtonLink from "../../components/UI/Button/ButtonLink";
 import Card from "../../components/UI/Card";
 import Page from "../../components/UI/Page";
@@ -97,9 +98,19 @@ export default function WordDetailPage() {
         title={word?.learningWord ?? t("wordDetailPage.title")}
         subtitle={word?.dictionaryName}
         actions={
-          <ButtonLink to={WORDS_PATH} style="secondary">
-            {t("wordDetailPage.backToWords")}
-          </ButtonLink>
+          <>
+            <Button
+              style="secondary"
+              onClick={() => {
+                void publishMyWord(vocabPairId);
+              }}
+            >
+              {t("wordDetailPage.publish")}
+            </Button>
+            <ButtonLink to={WORDS_PATH} style="secondary">
+              {t("wordDetailPage.backToWords")}
+            </ButtonLink>
+          </>
         }
       />
 

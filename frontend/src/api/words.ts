@@ -208,3 +208,7 @@ export async function addMyWord(
   const { data } = await apiClient.post<AddedWord>("/users/me/words", input);
   return data;
 }
+
+export async function publishMyWord(vocabPairId: number): Promise<void> {
+  await apiClient.post(`/users/me/words/${vocabPairId}/publish`);
+}

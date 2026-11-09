@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import * as storyService from "../services/story.service.js";
 import {
   getRequiredUserId,
+  getTaughtLanguageIds,
   sendServiceFailure,
   sendUnauthorized,
 } from "./helpers.js";
@@ -20,7 +21,12 @@ export async function listAdminStories(req: Request, res: Response) {
   const status =
     typeof req.query?.status === "string" ? req.query.status : undefined;
 
-  const result = await storyService.listAdminStories({ status, page, pageSize });
+  const result = await storyService.listAdminStories({
+    status,
+    page,
+    pageSize,
+    learningLanguageIds: getTaughtLanguageIds(req),
+  });
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -31,13 +37,18 @@ export async function listAdminStories(req: Request, res: Response) {
 
 export async function createAdminStory(req: Request, res: Response) {
   const body = req.body ?? {};
-  const result = await storyService.createAdminStory({
-    title: body.title,
-    primaryLanguageId: body.primaryLanguageId,
-    learningLanguageId: body.learningLanguageId,
-    status: body.status,
-    slug: body.slug,
-  });
+  const result = await storyService.createAdminStory(
+    {
+      title: body.title,
+      primaryLanguageId: body.primaryLanguageId,
+      learningLanguageId: body.learningLanguageId,
+      status: body.status,
+      slug: body.slug,
+      authorId: getRequiredUserId(req) ?? undefined,
+      verifiedAt: new Date(),
+    },
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -49,7 +60,7 @@ export async function getAdminStory(req: Request, res: Response) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return res.status(400).json({ error: "invalid story id" });
   }
-  const result = await storyService.getAdminStory(storyId);
+  const result = await storyService.getAdminStory(storyId, getTaughtLanguageIds(req));
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -62,13 +73,17 @@ export async function updateAdminStory(req: Request, res: Response) {
     return res.status(400).json({ error: "invalid story id" });
   }
   const body = req.body ?? {};
-  const result = await storyService.updateAdminStory(storyId, {
-    title: body.title,
-    primaryLanguageId: body.primaryLanguageId,
-    learningLanguageId: body.learningLanguageId,
-    status: body.status,
-    slug: body.slug,
-  });
+  const result = await storyService.updateAdminStory(
+    storyId,
+    {
+      title: body.title,
+      primaryLanguageId: body.primaryLanguageId,
+      learningLanguageId: body.learningLanguageId,
+      status: body.status,
+      slug: body.slug,
+    },
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -80,7 +95,7 @@ export async function deleteAdminStory(req: Request, res: Response) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return res.status(400).json({ error: "invalid story id" });
   }
-  const result = await storyService.deleteAdminStory(storyId);
+  const result = await storyService.deleteAdminStory(storyId, getTaughtLanguageIds(req));
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }
@@ -92,7 +107,11 @@ export async function replaceAdminStoryContent(req: Request, res: Response) {
   if (!Number.isInteger(storyId) || storyId < 1) {
     return res.status(400).json({ error: "invalid story id" });
   }
-  const result = await storyService.replaceAdminStoryContent(storyId, req.body);
+  const result = await storyService.replaceAdminStoryContent(
+    storyId,
+    req.body,
+    getTaughtLanguageIds(req),
+  );
   if (result.ok === false) {
     return sendServiceFailure(res, result);
   }

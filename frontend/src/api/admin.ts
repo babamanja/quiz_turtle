@@ -36,6 +36,7 @@ export type AdminUserDetails = {
     telegram: boolean;
   };
   vocabPairCount: number;
+  taughtLanguageIds: number[];
   subscription: {
     id: string;
     planCode: "basic" | "premium";
@@ -199,6 +200,17 @@ export async function getAdminUsers(
 
 export async function getAdminUserDetails(userId: number): Promise<AdminUserDetails> {
   const { data } = await apiClient.get<AdminUserDetails>(`/admin/users/${userId}`);
+  return data;
+}
+
+export async function setAdminUserTaughtLanguages(
+  userId: number,
+  languageIds: number[],
+): Promise<{ taughtLanguageIds: number[] }> {
+  const { data } = await apiClient.put<{ taughtLanguageIds: number[] }>(
+    `/admin/users/${userId}/taught-languages`,
+    { languageIds },
+  );
   return data;
 }
 

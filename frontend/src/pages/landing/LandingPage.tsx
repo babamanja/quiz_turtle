@@ -12,7 +12,7 @@ import { ProductHowItWorksSection } from './sections/ProductHowItWorksSection'
 import AuthModal from '../../components/auth/AuthModal'
 import type { AuthMode } from '../../components/auth/AuthPanel'
 import type { AuthSession } from '../../types'
-import { homePathForRole } from '../../paths'
+import { homePathForUser } from '../../paths'
 import LegalDocumentModal from '../legal/LegalDocumentModal'
 import { LEGAL_QUERY_KEY, parseLegalDocumentId } from '../legal/legalQuery'
 
@@ -48,7 +48,7 @@ export function LandingPage() {
   const handleLandingAuthSuccess = useCallback(
     async (session: AuthSession) => {
       closeAuthModal()
-      navigate(homePathForRole(session.user.role), { replace: true })
+      navigate(homePathForUser(session.user), { replace: true })
     },
     [closeAuthModal, navigate],
   )

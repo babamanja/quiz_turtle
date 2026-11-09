@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 
 import { trackAnalyticsEvent } from "../analytics";
 import { getVocabLanguages, type VocabLanguages } from "../api/words";
-import ButtonLink from "../components/UI/Button/ButtonLink";
+import Button from "../components/UI/Button/Button";
 import Card from "../components/UI/Card";
 import Page from "../components/UI/Page";
 import PageHeader from "../components/UI/PageHeader";
 import ReviewSession from "./words/ReviewSession";
+import SetLanguagesModal from "./SetLanguagesModal";
 
 import "./style.scss";
 
@@ -16,9 +17,14 @@ export default function UserDashboardPage() {
   const [languages, setLanguages] = useState<VocabLanguages | null>(null);
   const [languagesLoading, setLanguagesLoading] = useState(true);
   const [languagesMissing, setLanguagesMissing] = useState(false);
+  const [languagesOpen, setLanguagesOpen] = useState(false);
+  const [languagesReload, setLanguagesReload] = useState(0);
 
   useEffect(() => {
     trackAnalyticsEvent("user_dashboard_opened", {});
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     setLanguagesLoading(true);
     void getVocabLanguages()
@@ -42,7 +48,7 @@ export default function UserDashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [languagesReload]);
 
   const languagesLabel =
     languages?.primaryName && languages?.learningName
@@ -61,11 +67,16 @@ export default function UserDashboardPage() {
       {languagesLoading ? null : languagesMissing ? (
         <Card className="review-card review-card--empty">
           <p>{t("dashboard.user.languagesNotSet")}</p>
-          <ButtonLink to="/profile">{t("dashboard.user.setLanguages")}</ButtonLink>
+          <Button onClick={() => setLanguagesOpen(true)}>{t("dashboard.user.setLanguages")}</Button>
         </Card>
       ) : (
         <ReviewSession embedded trackOpen={false} />
       )}
+      <SetLanguagesModal
+        open={languagesOpen}
+        onClose={() => setLanguagesOpen(false)}
+        onSaved={() => setLanguagesReload((value) => value + 1)}
+      />
     </Page>
   );
 }

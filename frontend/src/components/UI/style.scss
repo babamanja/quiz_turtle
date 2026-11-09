@@ -204,6 +204,28 @@ a.button {
   padding: $space-lg;
   box-sizing: border-box;
 
+  &__close {
+    position: absolute;
+    top: $space-md;
+    right: $space-md;
+    z-index: 1;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: $radius-sm;
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: inherit;
+
+    &:hover {
+      background: $color-primary-soft;
+    }
+  }
+
   &__content {
     position: absolute;
     top: 50%;

@@ -15,6 +15,8 @@ export type User = {
   emailVerified?: boolean;
   /** Temporary guest account before signup. */
   isGuest?: boolean;
+  /** Languages this account may teach. Empty means not a teacher. */
+  taughtLanguageIds?: number[];
   primaryLanguageId?: number | null;
   learningLanguageId?: number | null;
 };

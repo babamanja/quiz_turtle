@@ -13,6 +13,8 @@ import {
   removeAdminVocabWordNestMember,
   updateAdminVocabWord,
 } from "../../api/admin";
+import { languagesTaughtByUser } from "../../appMode";
+import { getStoredUser } from "../../userStorage";
 import PartOfSpeechSelect from "../../components/PartOfSpeechSelect";
 import Button from "../../components/UI/Button/Button";
 import ButtonLink from "../../components/UI/Button/ButtonLink";
@@ -78,6 +80,7 @@ export default function AdminWordDetailPage() {
   const wordId = Number(wordIdParam);
 
   const [languages, setLanguages] = useState<AdminLanguage[]>([]);
+  const taughtLanguages = languagesTaughtByUser(languages, getStoredUser()?.taughtLanguageIds);
   const [tags, setTags] = useState<AdminTag[]>([]);
   const [text, setText] = useState("");
   const [languageId, setLanguageId] = useState<number | "">("");
@@ -313,7 +316,7 @@ export default function AdminWordDetailPage() {
                 setLanguageId(value ? Number(value) : "");
               }}
             >
-              {languages.map((language) => (
+              {taughtLanguages.map((language) => (
                 <option key={language.id} value={language.id}>
                   {language.name}
                 </option>

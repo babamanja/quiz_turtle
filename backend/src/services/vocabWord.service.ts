@@ -6,6 +6,7 @@ import * as tagRepository from "../db/tagRepository.js";
 import { getPrisma } from "../db/prisma.js";
 import * as vocabPairRepository from "../db/vocabPairRepository.js";
 import * as vocabWordRepository from "../db/vocabWordRepository.js";
+import { taughtLanguageDenied } from "./teacherScope.js";
 
 const MAX_WORD_TEXT_LENGTH = 200;
 
@@ -210,7 +211,11 @@ async function applyLearningPairMetadata(
   return { ok: true as const };
 }
 
-export async function createVocabWord(input: { text: unknown; languageId: unknown }) {
+export async function createVocabWord(
+  input: { text: unknown; languageId: unknown },
+  taughtLanguageIds: readonly number[],
+  authorId: number,
+) {
   const text = normalizeWordText(input.text);
   if (!text) {
     return { ok: false as const, status: 400, error: "word text is required" };
@@ -226,11 +231,20 @@ export async function createVocabWord(input: { text: unknown; languageId: unknow
     return { ok: false as const, status: 404, error: "language not found" };
   }
 
+  const denied = taughtLanguageDenied(taughtLanguageIds, languageId);
+  if (denied) {
+    return denied;
+  }
+
   if (await vocabWordRepository.isVocabWordTextTaken(languageId, text)) {
     return { ok: false as const, status: 409, error: "word already exists for language" };
   }
 
   const row = await vocabWordRepository.insertVocabWord({ languageId, text });
+  await getPrisma().vocabWord.update({
+    where: { id: row.id },
+    data: { authorId, verifiedAt: new Date() },
+  });
   return { ok: true as const, word: mapVocabWordRow(row) };
 }
 
@@ -242,6 +256,7 @@ export async function updateVocabWord(
     partOfSpeech?: unknown;
     tagIds?: unknown;
   },
+  taughtLanguageIds: readonly number[],
 ) {
   if (!Number.isInteger(wordId) || wordId < 1) {
     return { ok: false as const, status: 400, error: "invalid word id" };
@@ -250,6 +265,10 @@ export async function updateVocabWord(
   const existing = await vocabWordRepository.selectVocabWordById(wordId);
   if (!existing) {
     return { ok: false as const, status: 404, error: "word not found" };
+  }
+  const deniedExisting = taughtLanguageDenied(taughtLanguageIds, existing.languageId);
+  if (deniedExisting) {
+    return deniedExisting;
   }
 
   const text = input.text !== undefined ? normalizeWordText(input.text) : undefined;
@@ -261,6 +280,12 @@ export async function updateVocabWord(
     input.languageId !== undefined ? parseLanguageId(input.languageId) : undefined;
   if (input.languageId !== undefined && !languageId) {
     return { ok: false as const, status: 400, error: "invalid language id" };
+  }
+  if (languageId != null) {
+    const deniedNext = taughtLanguageDenied(taughtLanguageIds, languageId);
+    if (deniedNext) {
+      return deniedNext;
+    }
   }
 
   const partOfSpeech =
@@ -323,10 +348,10 @@ export async function updateVocabWord(
     return metadataResult;
   }
 
-  return getVocabWordDetail(wordId);
+  return getVocabWordDetail(wordId, taughtLanguageIds);
 }
 
-export async function deleteVocabWord(wordId: number) {
+export async function deleteVocabWord(wordId: number, taughtLanguageIds: readonly number[]) {
   if (!Number.isInteger(wordId) || wordId < 1) {
     return { ok: false as const, status: 400, error: "invalid word id" };
   }
@@ -334,6 +359,10 @@ export async function deleteVocabWord(wordId: number) {
   const existing = await vocabWordRepository.selectVocabWordById(wordId);
   if (!existing) {
     return { ok: false as const, status: 404, error: "word not found" };
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, existing.languageId);
+  if (denied) {
+    return denied;
   }
 
   const pairCount = existing._count.pairsAsWordA + existing._count.pairsAsWordB;
@@ -349,7 +378,10 @@ export async function deleteVocabWord(wordId: number) {
   return { ok: true as const };
 }
 
-export async function getVocabWordDetail(wordId: number) {
+export async function getVocabWordDetail(
+  wordId: number,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(wordId) || wordId < 1) {
     return { ok: false as const, status: 400, error: "invalid word id" };
   }
@@ -357,6 +389,10 @@ export async function getVocabWordDetail(wordId: number) {
   const word = await vocabWordRepository.selectVocabWordById(wordId);
   if (!word) {
     return { ok: false as const, status: 404, error: "word not found" };
+  }
+  const denied = taughtLanguageDenied(taughtLanguageIds, word.languageId);
+  if (denied) {
+    return denied;
   }
 
   const learningPairs = await selectLearningPairsForWord(wordId);
@@ -381,7 +417,11 @@ export async function getVocabWordDetail(wordId: number) {
   };
 }
 
-export async function addNestMemberToVocabWord(wordId: number, formRaw: unknown) {
+export async function addNestMemberToVocabWord(
+  wordId: number,
+  formRaw: unknown,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(wordId) || wordId < 1) {
     return { ok: false as const, status: 400, error: "invalid word id" };
   }
@@ -395,15 +435,23 @@ export async function addNestMemberToVocabWord(wordId: number, formRaw: unknown)
   if (!word) {
     return { ok: false as const, status: 404, error: "word not found" };
   }
+  const denied = taughtLanguageDenied(taughtLanguageIds, word.languageId);
+  if (denied) {
+    return denied;
+  }
   if (word.text.trim().toLowerCase() === form.toLowerCase()) {
     return { ok: false as const, status: 400, error: "nest form same as anchor" };
   }
 
   await nestRepository.addMemberToNest(word.nestId, word.languageId, form);
-  return getVocabWordDetail(wordId);
+  return getVocabWordDetail(wordId, taughtLanguageIds);
 }
 
-export async function removeNestMemberFromVocabWord(wordId: number, memberWordId: number) {
+export async function removeNestMemberFromVocabWord(
+  wordId: number,
+  memberWordId: number,
+  taughtLanguageIds: readonly number[],
+) {
   if (!Number.isInteger(wordId) || wordId < 1) {
     return { ok: false as const, status: 400, error: "invalid word id" };
   }
@@ -418,6 +466,10 @@ export async function removeNestMemberFromVocabWord(wordId: number, memberWordId
   if (!word) {
     return { ok: false as const, status: 404, error: "word not found" };
   }
+  const denied = taughtLanguageDenied(taughtLanguageIds, word.languageId);
+  if (denied) {
+    return denied;
+  }
 
   const memberNestId = await nestRepository.selectNestIdForWord(memberWordId);
   if (memberNestId !== word.nestId) {
@@ -429,5 +481,5 @@ export async function removeNestMemberFromVocabWord(wordId: number, memberWordId
     return { ok: false as const, status: 400, error: "nest member not removable" };
   }
 
-  return getVocabWordDetail(wordId);
+  return getVocabWordDetail(wordId, taughtLanguageIds);
 }

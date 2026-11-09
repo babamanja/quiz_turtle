@@ -749,6 +749,223 @@
   }
 }
 
+.auth-page {
+  min-height: calc(100vh - #{$space-2xl * 2});
+  display: grid;
+  place-items: center;
+  padding: $space-2xl $space-md;
+  box-sizing: border-box;
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(5rem, 1fr) minmax(0, 26rem) minmax(5rem, 1fr);
+    align-items: center;
+    gap: clamp(#{$space-md}, 4vw, #{$space-2xl});
+    width: 100%;
+    max-width: 52rem;
+  }
+
+  &__mascot {
+    display: none;
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 26rem;
+    justify-self: center;
+    padding: $space-2xl;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-surface;
+    box-shadow: $shadow-card;
+    box-sizing: border-box;
+  }
+
+  &__card--modal {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    max-width: none;
+    background: transparent;
+
+    .auth-page__title {
+      padding-right: 2rem;
+    }
+  }
+
+  &__title {
+    margin: 0 0 $space-lg;
+    text-align: center;
+    font-size: clamp(1.35rem, 3vw, 1.65rem);
+  }
+
+  &__subtitle {
+    margin: 0 0 $space-lg;
+    color: $color-text-muted;
+    line-height: 1.45;
+    font-size: 0.95rem;
+  }
+
+  &__section {
+    margin-top: $space-xl;
+    width: 100%;
+  }
+
+  &__section-title {
+    font-size: 1rem;
+    margin: 0 0 $space-md;
+  }
+
+  &__footer {
+    margin-top: $space-xl;
+    text-align: center;
+  }
+
+  &__tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-sm;
+    margin-bottom: $space-lg;
+    width: 100%;
+  }
+
+  &__tab {
+    min-height: 2.75rem;
+    padding: $space-md $space-lg;
+    border-radius: $radius-sm;
+    border: 1px solid $color-border;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    text-align: center;
+    color: $color-text;
+  }
+
+  &__tab--active {
+    border-color: $color-primary;
+    color: $color-primary;
+    background: $color-primary-soft;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: $space-md;
+    width: 100%;
+
+    .button {
+      width: 100%;
+      margin: 0;
+      min-height: 2.75rem;
+      justify-content: center;
+    }
+
+    .text-input-label {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: $space-sm;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .text-input,
+    .text-input-wrap {
+      margin-bottom: 0;
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: $space-sm;
+    width: 100%;
+    font-size: 0.9rem;
+    text-align: left;
+
+    span {
+      font-weight: 600;
+      color: $color-text;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      padding: $space-md;
+      font: inherit;
+      min-height: 2.75rem;
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+        box-shadow: 0 0 10px 0 rgba($color-primary, 0.5);
+      }
+    }
+  }
+
+  &__link-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: $space-md;
+  }
+
+  &__link-row--start {
+    justify-content: flex-start;
+  }
+
+  &__separator {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    width: 100%;
+    margin: $space-sm 0 $space-md;
+    color: $color-text-muted;
+    font-size: 0.85rem;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $color-border;
+    }
+  }
+
+  &__google {
+    width: 100%;
+    min-height: 2.75rem;
+
+    [role="button"] {
+      width: 100% !important;
+      max-width: none !important;
+    }
+  }
+
+  &__hint,
+  &__error {
+    margin: 0;
+    color: $color-text-muted;
+    text-align: center;
+  }
+
+  &__error {
+    margin-top: $space-md;
+    color: $color-error;
+  }
+
+  h2 {
+    margin: 0 0 $space-lg;
+    text-align: center;
+    font-size: 1.15rem;
+  }
+}
+
 @include mobile {
   .upload-file {
     &__input,

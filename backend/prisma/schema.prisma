@@ -37,6 +37,10 @@ model User {
   storyProgress           UserStoryProgress[]
   primaryLanguage         Language? @relation("PrimaryLanguage", fields: [primaryLanguageId], references: [id])
   learningLanguage        Language? @relation("LearningLanguage", fields: [learningLanguageId], references: [id])
+  taughtLanguages         TeacherLanguage[]
+  authoredStories         Story[]              @relation("StoryAuthor")
+  authoredPairs           VocabPair[]          @relation("PairAuthor")
+  authoredWords           VocabWord[]          @relation("WordAuthor")
 
   @@map("users")
 }
@@ -205,8 +209,20 @@ model Language {
   learningUsers          User[]        @relation("LearningLanguage")
   storiesAsPrimary       Story[]       @relation("StoryPrimaryLanguage")
   storiesAsLearning      Story[]       @relation("StoryLearningLanguage")
+  teachers               TeacherLanguage[]
 
   @@map("languages")
+}
+
+model TeacherLanguage {
+  userId     Int @map("user_id")
+  languageId Int @map("language_id")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  @@id([userId, languageId])
+  @@map("teacher_languages")
 }
 
 model LexicalNest {
@@ -226,8 +242,11 @@ model VocabWord {
   languageId Int    @map("language_id")
   nestId     Int    @map("nest_id")
   text       String @map("text")
+  authorId   Int?   @map("author_id")
+  verifiedAt DateTime? @map("verified_at")
 
   language          Language                @relation("LanguageVocabWords", fields: [languageId], references: [id])
+  author            User?                   @relation("WordAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   nest              LexicalNest             @relation(fields: [nestId], references: [id])
   pairsAsWordA      VocabPair[]             @relation("WordA")
   pairsAsWordB      VocabPair[]             @relation("WordB")
@@ -256,8 +275,12 @@ model VocabPair {
   learningLanguageId Int?                  @map("learning_language_id")
   partOfSpeech       String?               @map("part_of_speech")
   example            String?               @db.Text
+  authorId           Int?                  @map("author_id")
+  publishedAt        DateTime?             @map("published_at")
+  verifiedAt         DateTime?             @map("verified_at")
 
   wordA            VocabWord         @relation("WordA", fields: [wordAId], references: [id])
+  author           User?             @relation("PairAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   wordB            VocabWord         @relation("WordB", fields: [wordBId], references: [id])
   dictionaryEntries DictionaryEntry[]
   tags             VocabPairTag[]
@@ -297,8 +320,10 @@ model VocabPairTag {
 model Dictionary {
   id        Int      @id @default(autoincrement())
   creatorId Int      @map("creator_id")
-  name      String   @default("My dictionary") @map("name")
-  createdAt DateTime @default(now()) @map("created_at")
+  name       String    @default("My dictionary") @map("name")
+  isPublic   Boolean   @default(false) @map("is_public")
+  verifiedAt DateTime? @map("verified_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   creator User              @relation("CreatedDictionaries", fields: [creatorId], references: [id], onDelete: Cascade)
   entries DictionaryEntry[]
@@ -383,9 +408,12 @@ model Story {
   primaryLanguageId  Int         @map("primary_language_id")
   learningLanguageId Int         @map("learning_language_id")
   status             StoryStatus @default(draft)
+  authorId           Int?        @map("author_id")
+  verifiedAt         DateTime?   @map("verified_at")
   createdAt          DateTime    @default(now()) @map("created_at")
   updatedAt          DateTime    @updatedAt @map("updated_at")
 
+  author           User?               @relation("StoryAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   primaryLanguage  Language            @relation("StoryPrimaryLanguage", fields: [primaryLanguageId], references: [id])
   learningLanguage Language            @relation("StoryLearningLanguage", fields: [learningLanguageId], references: [id])
   sentences        StorySentence[]

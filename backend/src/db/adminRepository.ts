@@ -33,6 +33,7 @@ export type AdminUserDetailsRow = {
   hasGoogle: boolean;
   hasTelegram: boolean;
   vocabPairCount: number;
+  taughtLanguageIds: number[];
   subscription: {
     id: string;
     planCode: "basic" | "premium";
@@ -184,6 +185,10 @@ export async function selectAdminUserDetailsById(
         },
         take: 1,
       },
+      taughtLanguages: {
+        select: { languageId: true },
+        orderBy: { languageId: "asc" },
+      },
     },
   });
 
@@ -201,6 +206,7 @@ export async function selectAdminUserDetailsById(
     hasGoogle: Boolean(row.auth?.googleSub),
     hasTelegram: row.telegramId != null,
     vocabPairCount: row.userDictionaries[0]?.dictionary._count.entries ?? 0,
+    taughtLanguageIds: row.taughtLanguages.map((entry) => entry.languageId),
     subscription: row.subscription
       ? {
           id: row.subscription.id,
@@ -447,13 +453,30 @@ export type AdminVocabWordsListQuery = {
   sortOrder: "asc" | "desc";
   search?: string;
   languageId?: number;
+  languageIds?: number[];
 };
+
+function vocabWordLanguageWhere(
+  languageId: number | undefined,
+  languageIds: number[] | undefined,
+): Prisma.VocabWordWhereInput {
+  if (languageId != null && languageIds != null && !languageIds.includes(languageId)) {
+    return { languageId: { in: [] } };
+  }
+  if (languageId != null) {
+    return { languageId };
+  }
+  if (languageIds != null) {
+    return { languageId: { in: languageIds } };
+  }
+  return {};
+}
 
 export async function selectAdminVocabWords(
   input: AdminVocabWordsListQuery,
 ): Promise<{ rows: AdminVocabWordRow[]; total: number }> {
   const where: Prisma.VocabWordWhereInput = {
-    ...(input.languageId != null ? { languageId: input.languageId } : {}),
+    ...vocabWordLanguageWhere(input.languageId, input.languageIds),
     ...(input.search
       ? {
           OR: [
@@ -525,6 +548,7 @@ export type AdminDictionariesListQuery = {
   sortOrder: "asc" | "desc";
   search?: string;
   primaryLanguageId?: number;
+  learningLanguageIds?: number[];
   tagId?: number;
 };
 
@@ -547,6 +571,20 @@ export async function selectAdminDictionaries(
       OR: [
         { wordA: { languageId: input.primaryLanguageId } },
         { wordB: { languageId: input.primaryLanguageId } },
+      ],
+    });
+  }
+
+  if (input.learningLanguageIds != null) {
+    andFilters.push({
+      OR: [
+        { learningLanguageId: { in: input.learningLanguageIds } },
+        {
+          AND: [
+            { learningLanguageId: null },
+            { wordB: { languageId: { in: input.learningLanguageIds } } },
+          ],
+        },
       ],
     });
   }

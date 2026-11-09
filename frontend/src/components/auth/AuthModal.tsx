@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { useLockBody } from "../../hooks/useLockBody";
+import "../UI/style.scss";
 import AuthPanel, { type AuthMode } from "./AuthPanel";
 
 type AuthModalProps = {
@@ -26,27 +27,26 @@ export default function AuthModal({
   }
 
   return (
-    <div className="auth-modal" role="presentation">
-      <button
-        type="button"
-        className="auth-modal__backdrop"
-        aria-label={t("auth.modalClose")}
-        onClick={onClose}
-      />
-      <div className="auth-modal__dialog" role="dialog" aria-modal="true" aria-label={t("auth.title")}>
-        <button type="button" className="auth-modal__close" onClick={onClose} aria-label={t("auth.modalClose")}>
+    <section
+      className="modal"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <section className="modal__content" role="dialog" aria-modal="true" aria-label={t("auth.title")}>
+        <button type="button" className="modal__close" onClick={onClose} aria-label={t("auth.modalClose")}>
           ×
         </button>
-        <div className="auth-modal__body">
-          <AuthPanel
-            variant="modal"
-            initialMode={initialMode}
-            titleHeading="h2"
-            onAuthSuccess={onAuthSuccess}
-            redirectOnSuccess={redirectOnSuccess}
-          />
-        </div>
-      </div>
-    </div>
+        <AuthPanel
+          variant="modal"
+          initialMode={initialMode}
+          titleHeading="h2"
+          onAuthSuccess={onAuthSuccess}
+          redirectOnSuccess={redirectOnSuccess}
+        />
+      </section>
+    </section>
   );
 }

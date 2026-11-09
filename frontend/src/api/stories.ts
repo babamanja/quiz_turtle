@@ -58,6 +58,10 @@ export async function getMyStories(): Promise<UserStoryListItem[]> {
   return data.items;
 }
 
+export async function publishMyStory(input: { title: string; text: string }): Promise<void> {
+  await apiClient.post("/users/me/stories", input);
+}
+
 export async function getMyStory(storyId: number): Promise<UserStory> {
   const { data } = await apiClient.get<UserStory>(`/users/me/stories/${storyId}`);
   return data;

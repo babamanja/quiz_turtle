@@ -13,7 +13,7 @@ import {
 } from "../../api/auth";
 import { refreshSession } from "../../api/refreshSessionApi";
 import type { AccountDeletedLocationState } from "../../authNavigationTypes";
-import { homePathForRole } from "../../paths";
+import { homePathForUser } from "../../paths";
 import type { AuthSession } from "../../types";
 import { getStoredAuthToken, setStoredSession } from "../../userStorage";
 import Button from "../UI/Button/Button";
@@ -105,7 +105,7 @@ export default function AuthPanel({
       return;
     }
     if (redirectOnSuccess) {
-      navigate(homePathForRole(authSession.user.role), { replace: true });
+      navigate(homePathForUser(authSession.user), { replace: true });
     }
   }
 
@@ -244,9 +244,11 @@ export default function AuthPanel({
         },
       });
       googleButtonRef.current.innerHTML = "";
-      window.google.accounts.id.renderButton(googleButtonRef.current, {
+      const googleHost = googleButtonRef.current;
+      window.google.accounts.id.renderButton(googleHost, {
         theme: "outline",
         size: "large",
+        width: Math.floor(googleHost.clientWidth),
       });
     });
   }, [googleClientId, navigate, t]);

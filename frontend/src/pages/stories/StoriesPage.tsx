@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { getMyStories, type UserStoryListItem } from "../../api/stories";
+import { getMyStories, publishMyStory, type UserStoryListItem } from "../../api/stories";
+import Button from "../../components/UI/Button/Button";
 import Page from "../../components/UI/Page";
 import PageHeader from "../../components/UI/PageHeader";
 import ResponsiveDataList from "../../components/UI/ResponsiveDataList";
@@ -16,6 +17,8 @@ export default function StoriesPage() {
   const [items, setItems] = useState<UserStoryListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [title, setTitle] = useState("");
+  const [text, setText] = useState("");
 
   const loadStories = useCallback(async () => {
     setIsLoading(true);
@@ -72,6 +75,20 @@ export default function StoriesPage() {
     <Page width="full">
       <PageHeader title={t("storiesPage.title")} subtitle={t("storiesPage.description")} />
       {error ? <p className="upload-file__error">{error}</p> : null}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void publishMyStory({ title, text }).then(() => {
+            setTitle("");
+            setText("");
+            return loadStories();
+          });
+        }}
+      >
+        <input className="text-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t("storiesPage.titleField")} required />
+        <textarea className="text-input" value={text} onChange={(event) => setText(event.target.value)} placeholder={t("storiesPage.textField")} required />
+        <Button type="submit">{t("storiesPage.publish")}</Button>
+      </form>
       {isLoading ? <p>{t("storiesPage.loading")}</p> : null}
       {!isLoading ? (
         <ResponsiveDataList

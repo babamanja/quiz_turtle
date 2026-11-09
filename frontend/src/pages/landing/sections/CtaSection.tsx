@@ -4,7 +4,7 @@ import { trackUiCtaClick } from '../../../analytics'
 import Button from '../../../components/UI/Button/Button'
 import ButtonLink from '../../../components/UI/Button/ButtonLink'
 import { isAuthenticatedUser, useSession } from '../../../hooks/useSession'
-import { homePathForRole } from '../../../paths'
+import { homePathForUser } from '../../../paths'
 
 type CtaSectionProps = {
   onGetStarted: () => void
@@ -57,7 +57,7 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
   const { t } = useTranslation()
   const { user, token } = useSession()
   const isLoggedIn = isAuthenticatedUser(user?.role, token)
-  const appPath = homePathForRole(user?.role)
+  const appPath = homePathForUser(user)
 
   return (
     <section className="lt-cta" id="about" aria-labelledby="cta-section-title">

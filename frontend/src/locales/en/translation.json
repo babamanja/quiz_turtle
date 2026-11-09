@@ -26,6 +26,7 @@
     "adminLanguages": "Languages",
     "adminWords": "Words",
     "adminStories": "Stories",
+    "teacherReview": "Review",
     "adminTranslations": "Translations",
     "adminUserPairs": "User pairs",
     "adminAiUsage": "AI usage",
@@ -39,7 +40,13 @@
       "basic": "Basic",
       "premium": "Premium"
     },
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "modeSwitch": "Switch role",
+    "mode": {
+      "student": "Student",
+      "teacher": "Teacher",
+      "admin": "Admin"
+    }
   },
   "dashboard": {
     "user": {
@@ -59,7 +66,7 @@
       "subscriptionStatusCanceled": "Canceled",
       "subscriptionStatusPastDue": "Past due",
       "languagesValue": "Learning: {{primary}} → {{learning}}",
-      "languagesNotSet": "Set your native and learning languages in Profile to start adding words.",
+      "languagesNotSet": "Set your native and learning languages to start adding words.",
       "setLanguages": "Set languages",
       "stats": {
         "vocabPairCount": "Words learning",
@@ -313,6 +320,11 @@
     "userDetailsTitle": "Admin: User #{{userId}}",
     "userDetailsBackToUsers": "Back to users",
     "userDetailsProfileSection": "Profile",
+    "userDetailsTaughtLanguages": "Languages they teach",
+    "userDetailsTaughtLanguagesSave": "Save taught languages",
+    "userDetailsTaughtLanguagesSaving": "Saving...",
+    "userDetailsTaughtLanguagesSaved": "Taught languages saved",
+    "userDetailsTaughtLanguagesFailed": "Could not save taught languages",
     "userDetailsTokenAdjustSection": "Adjust points",
     "userDetailsTokenDeltaLabel": "Delta (use + for credit, - for debit)",
     "userDetailsTokenCommentLabel": "Comment for ledger",
@@ -628,7 +640,11 @@
     "empty": "You do not have any dictionaries yet.",
     "defaultBadge": "Default",
     "creatorYou": "You",
-    "viewWords": "View words"
+    "viewWords": "View words",
+    "publish": "Publish",
+    "unpublish": "Make private",
+    "publicTitle": "Public dictionaries",
+    "verified": "Verified"
   },
   "storiesPage": {
     "title": "Stories",
@@ -636,6 +652,9 @@
     "loading": "Loading stories...",
     "loadFailed": "Could not load stories",
     "empty": "No published stories yet.",
+    "publish": "Publish story",
+    "titleField": "Title",
+    "textField": "Story text",
     "levelProgress": "Level {{unlocked}} / {{max}}",
     "readerTitle": "Story",
     "readerSubtitle": "{{percent}}% · level {{unlocked}} / {{max}}",
@@ -646,6 +665,15 @@
     "maxLevelReached": "Max level reached",
     "back": "Back to stories",
     "invalidId": "Invalid story ID"
+  },
+  "review": {
+    "title": "Review",
+    "description": "Student publications in the languages you teach.",
+    "stories": "Stories",
+    "dictionaries": "Dictionaries",
+    "words": "Words",
+    "verify": "Verify",
+    "loadFailed": "Could not load the review queue"
   },
   "wordsPage": {
     "title": "My Words",
@@ -690,6 +718,7 @@
     "saving": "Saving...",
     "save": "Save",
     "backToWords": "Back to words",
+    "publish": "Publish",
     "invalidId": "Invalid word id",
     "notFound": "Word not found in your dictionary",
     "word": "Word",

@@ -20,6 +20,9 @@ import {
 
 } from "../../api/admin";
 
+import { languagesTaughtByUser } from "../../appMode";
+import { getStoredUser } from "../../userStorage";
+
 import PartOfSpeechSelect from "../../components/PartOfSpeechSelect";
 import Button from "../../components/UI/Button/Button";
 
@@ -168,6 +171,7 @@ export default function AdminTranslationsPage() {
   const [filterTagId, setFilterTagId] = useState<number | "">("");
 
   const [languages, setLanguages] = useState<AdminLanguage[]>([]);
+  const taughtLanguages = languagesTaughtByUser(languages, getStoredUser()?.taughtLanguageIds);
 
   const [tags, setTags] = useState<AdminTag[]>([]);
 
@@ -1089,7 +1093,7 @@ export default function AdminTranslationsPage() {
 
               >
 
-                {languages.map((language) => (
+                {taughtLanguages.map((language) => (
 
                   <option key={language.id} value={language.id}>
 

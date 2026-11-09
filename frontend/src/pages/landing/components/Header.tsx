@@ -10,7 +10,8 @@ import ButtonLink from '../../../components/UI/Button/ButtonLink'
 import { MEDIA_MOBILE } from '../../../constants/breakpoints'
 import { isAuthenticatedUser, useSession } from '../../../hooks/useSession'
 import { useMediaQuery } from '../../../hooks/useMediaQuery'
-import { homePathForRole } from '../../../paths'
+import { activeAppMode } from '../../../appMode'
+import { homePathForUser } from '../../../paths'
 import { clearStoredSession } from '../../../userStorage'
 import '../../landing/landing.scss'
 
@@ -35,7 +36,7 @@ export function Header({ onOpenAuth }: HeaderProps) {
   const navigate = useNavigate()
   const { user, token } = useSession()
   const isLoggedIn = isAuthenticatedUser(user?.role, token) && !user?.isGuest
-  const appPath = homePathForRole(user?.role)
+  const appPath = homePathForUser(user)
   const menuId = useId()
   const userMenuId = useId()
   const isNarrow = useMediaQuery(MEDIA_MOBILE)
@@ -111,7 +112,7 @@ export function Header({ onOpenAuth }: HeaderProps) {
 
   const userLabel = displayName(user?.userName, user?.email)
   const dashboardLabel =
-    (user?.role ?? '').toLowerCase() === 'admin'
+    activeAppMode(user) === 'admin'
       ? t('nav.adminDashboard')
       : t('nav.dashboard')
 

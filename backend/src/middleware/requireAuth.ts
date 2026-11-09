@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import * as teacherLanguageRepository from "../db/teacherLanguageRepository.js";
 import * as userRepository from "../db/userRepository.js";
 import { extractBearerToken, getJwtSecret } from "../utils/optionalAuth.js";
 
@@ -24,7 +25,8 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     if (!user) {
       return res.status(401).json({ error: "unauthorized" });
     }
-    req.user = { id: user.id, role: user.role };
+    const taughtLanguageIds = await teacherLanguageRepository.listTeacherLanguageIds(user.id);
+    req.user = { id: user.id, role: user.role, taughtLanguageIds };
     return next();
   } catch {
     return res.status(401).json({ error: "unauthorized" });

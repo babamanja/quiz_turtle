@@ -113,6 +113,8 @@ export type UserDictionaryRow = {
   creatorName: string;
   isDefault: boolean;
   isOwner: boolean;
+  isPublic: boolean;
+  verified: boolean;
   entryCount: number;
   createdAt: string;
 };
@@ -140,6 +142,8 @@ export async function selectUserDictionaries(userId: number): Promise<UserDictio
     creatorName: link.dictionary.creator.userName,
     isDefault: link.isDefault,
     isOwner: link.dictionary.creatorId === userId,
+    isPublic: link.dictionary.isPublic,
+    verified: link.dictionary.verifiedAt != null,
     entryCount: link.dictionary._count.entries,
     createdAt: link.dictionary.createdAt.toISOString(),
   }));

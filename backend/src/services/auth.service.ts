@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import * as authRepository from "../db/authRepository.js";
+import * as teacherLanguageRepository from "../db/teacherLanguageRepository.js";
 import * as userRepository from "../db/userRepository.js";
 import {
   getAuthPublicAppUrl,
@@ -83,7 +84,7 @@ function signRefreshToken(user: AuthUser): string {
   });
 }
 
-function createAuthResponse(user: AuthUser, options?: { isNewUser?: boolean }) {
+async function createAuthResponse(user: AuthUser, options?: { isNewUser?: boolean }) {
   const token = jwt.sign(
     { sub: user.id, email: user.email, type: "access" },
     getJwtSecret(),
@@ -91,6 +92,7 @@ function createAuthResponse(user: AuthUser, options?: { isNewUser?: boolean }) {
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     },
   );
+  const taughtLanguageIds = await teacherLanguageRepository.listTeacherLanguageIds(user.id);
   const base = {
     token,
     user: {
@@ -100,6 +102,7 @@ function createAuthResponse(user: AuthUser, options?: { isNewUser?: boolean }) {
       role: user.role,
       emailVerified: Boolean(user.emailVerifiedAt),
       isGuest: user.isGuest,
+      taughtLanguageIds,
     },
     providers: {
       password: Boolean(user.passwordHash),
@@ -112,16 +115,16 @@ function createAuthResponse(user: AuthUser, options?: { isNewUser?: boolean }) {
   return base;
 }
 
-function createAuthResult(user: AuthUser, options?: { isNewUser?: boolean }) {
+async function createAuthResult(user: AuthUser, options?: { isNewUser?: boolean }) {
   return {
-    auth: createAuthResponse(user, options),
+    auth: await createAuthResponse(user, options),
     refreshToken: signRefreshToken(user),
   };
 }
 
 export async function createGuestSession() {
   const row = await createGuestUser();
-  return { ok: true as const, ...createAuthResult(userAuthRowToAuthUser(row), { isNewUser: true }) };
+  return { ok: true as const, ...(await createAuthResult(userAuthRowToAuthUser(row), { isNewUser: true })) };
 }
 
 export async function signUpWithPassword(
@@ -194,7 +197,7 @@ export async function signUpWithPassword(
         console.error("[auth] Failed to send verification email", { email, error });
       }
     }
-    return { ok: true as const, ...createAuthResult(row, { isNewUser: true }) };
+    return { ok: true as const, ...(await createAuthResult(row, { isNewUser: true })) };
   }
 
   if (existing) {
@@ -245,7 +248,7 @@ export async function signUpWithPassword(
   await subscriptionRepository.ensureDefaultBasicSubscription(row.id);
   await dictionaryRepository.ensureDefaultDictionaryForUser(row.id);
 
-  return { ok: true as const, ...createAuthResult(row, { isNewUser: true }) };
+  return { ok: true as const, ...(await createAuthResult(row, { isNewUser: true })) };
 }
 
 export async function logInWithPassword(
@@ -290,7 +293,7 @@ export async function logInWithPassword(
   if (guestUserId && guestUserId !== row.id) {
     await mergeGuestIntoUser(guestUserId, row.id);
   }
-  return { ok: true as const, ...createAuthResult(row) };
+  return { ok: true as const, ...(await createAuthResult(row)) };
 }
 
 function deriveUserName(
@@ -351,7 +354,7 @@ export async function logInWithGoogle(
     if (guestUserId && guestUserId !== existingBySub.id) {
       await mergeGuestIntoUser(guestUserId, existingBySub.id);
     }
-    return { ok: true as const, ...createAuthResult(existingBySub, { isNewUser: false }) };
+    return { ok: true as const, ...(await createAuthResult(existingBySub, { isNewUser: false })) };
   }
 
   if (guestUserId) {
@@ -370,7 +373,7 @@ export async function logInWithGoogle(
     }
     return {
       ok: true as const,
-      ...createAuthResult(converted.row, { isNewUser: true }),
+      ...(await createAuthResult(converted.row, { isNewUser: true })),
     };
   }
 
@@ -383,7 +386,7 @@ export async function logInWithGoogle(
     await subscriptionRepository.ensureDefaultBasicSubscription(row.id);
     await dictionaryRepository.ensureDefaultDictionaryForUser(row.id);
   }
-  return { ok: true as const, ...createAuthResult(row, { isNewUser }) };
+  return { ok: true as const, ...(await createAuthResult(row, { isNewUser })) };
 }
 
 export async function restoreDeletedAccount(body: {
@@ -440,7 +443,7 @@ export async function restoreDeletedAccount(body: {
         error: "restore failed",
       };
     }
-    return { ok: true as const, ...createAuthResult(authRow) };
+    return { ok: true as const, ...(await createAuthResult(authRow)) };
   }
 
   const email = body.email?.trim().toLowerCase() ?? "";
@@ -486,7 +489,7 @@ export async function restoreDeletedAccount(body: {
       error: "restore failed",
     };
   }
-  return { ok: true as const, ...createAuthResult(authRow) };
+  return { ok: true as const, ...(await createAuthResult(authRow)) };
 }
 
 export async function refreshSession(refreshToken: string) {
@@ -521,7 +524,7 @@ export async function refreshSession(refreshToken: string) {
         error: "invalid refresh token",
       };
     }
-    return { ok: true as const, ...createAuthResult(userAuthRowToAuthUser(authRow)) };
+    return { ok: true as const, ...(await createAuthResult(userAuthRowToAuthUser(authRow))) };
   } catch {
     return { ok: false as const, status: 401, error: "invalid refresh token" };
   }
@@ -535,7 +538,10 @@ export async function getCurrentUser(userId: number) {
   if (!authRow || authRow.deletedAt) {
     return { ok: false as const, status: 401, error: "unauthorized" };
   }
-  return { ok: true as const, currentUser: createAuthResponse(userAuthRowToAuthUser(authRow)) };
+  return {
+    ok: true as const,
+    currentUser: await createAuthResponse(userAuthRowToAuthUser(authRow)),
+  };
 }
 
 export async function forgotPassword(body: { email?: string; appBaseUrl?: string }) {

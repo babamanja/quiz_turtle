@@ -2,6 +2,7 @@ import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import * as storyController from "../controllers/story.controller.js";
 import * as userController from "../controllers/user.controller.js";
+import * as publicationController from "../controllers/publication.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
@@ -12,6 +13,16 @@ router.get("/me/dashboard-stats", requireAuth, asyncHandler(userController.getDa
 router.get("/me/review/due", requireAuth, asyncHandler(userController.getDueReviewWords));
 router.post("/me/review/:vocabPairId", requireAuth, asyncHandler(userController.submitReviewResult));
 router.get("/me/dictionaries", requireAuth, asyncHandler(userController.listMyDictionaries));
+router.post(
+  "/me/dictionaries/:dictionaryId/public",
+  requireAuth,
+  asyncHandler(publicationController.setMyDictionaryPublic),
+);
+router.get(
+  "/public/dictionaries",
+  requireAuth,
+  asyncHandler(publicationController.listPublicDictionaries),
+);
 router.get("/me/words", requireAuth, asyncHandler(userController.listMyWords));
 router.get("/me/words/:vocabPairId", requireAuth, asyncHandler(userController.getMyWord));
 router.patch("/me/words/:vocabPairId", requireAuth, asyncHandler(userController.updateMyWord));
@@ -28,6 +39,12 @@ router.delete(
 router.get("/me/vocab-languages", requireAuth, asyncHandler(userController.getVocabLanguages));
 router.post("/me/words/lookup-primary", requireAuth, asyncHandler(userController.lookupPrimaryWord));
 router.post("/me/words", requireAuth, asyncHandler(userController.addMyWord));
+router.post(
+  "/me/words/:vocabPairId/publish",
+  requireAuth,
+  asyncHandler(publicationController.publishMyWord),
+);
+router.post("/me/stories", requireAuth, asyncHandler(publicationController.publishMyStory));
 router.get("/me/stories", requireAuth, asyncHandler(storyController.listMyStories));
 router.get("/me/stories/:storyId", requireAuth, asyncHandler(storyController.getMyStory));
 router.post(

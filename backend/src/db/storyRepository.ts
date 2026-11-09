@@ -60,9 +60,14 @@ export async function selectStories(input: {
   status?: StoryStatus;
   page: number;
   pageSize: number;
+  learningLanguageIds?: number[];
 }): Promise<{ rows: StoryListRow[]; total: number }> {
-  const where: Prisma.StoryWhereInput =
-    input.status != null ? { status: input.status } : {};
+  const where: Prisma.StoryWhereInput = {
+    ...(input.status != null ? { status: input.status } : {}),
+    ...(input.learningLanguageIds != null
+      ? { learningLanguageId: { in: input.learningLanguageIds } }
+      : {}),
+  };
   const offset = (input.page - 1) * input.pageSize;
 
   const [rows, total] = await Promise.all([
@@ -109,6 +114,8 @@ export async function insertStory(input: {
   primaryLanguageId: number;
   learningLanguageId: number;
   status: StoryStatus;
+  authorId?: number | null;
+  verifiedAt?: Date | null;
 }): Promise<StoryGraphRow> {
   return getPrisma().story.create({
     data: {
@@ -117,6 +124,8 @@ export async function insertStory(input: {
       primaryLanguageId: input.primaryLanguageId,
       learningLanguageId: input.learningLanguageId,
       status: input.status,
+      authorId: input.authorId ?? null,
+      verifiedAt: input.verifiedAt ?? null,
     },
     include: storyGraphInclude,
   });

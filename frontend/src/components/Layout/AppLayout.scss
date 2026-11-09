@@ -216,6 +216,36 @@ $app-topbar-z: 101;
   font-variant-numeric: tabular-nums;
 }
 
+.app-mode-switch {
+  display: flex;
+  gap: 4px;
+  margin: $space-sm $space-md;
+}
+
+.app-topbar .app-mode-switch {
+  margin: 0 $space-sm;
+  flex: 1;
+  min-width: 0;
+}
+
+.app-mode-switch__button {
+  flex: 1;
+  border: 1px solid $color-border;
+  background: transparent;
+  border-radius: 999px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+
+  &--active {
+    background: $color-primary;
+    color: $color-surface;
+    border-color: $color-primary;
+  }
+}
+
 .app-nav {
   flex: 1;
   min-height: 0;

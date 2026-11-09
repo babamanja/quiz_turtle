@@ -1,20 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { trackAnalyticsEvent } from "../analytics";
-import { type UserDictionary, getMyDictionaries } from "../api/dictionaries";
+import { type UserDictionary, getMyDictionaries, getPublicDictionaries, setDictionaryPublic, type PublicDictionary } from "../api/dictionaries";
+import Button from "../components/UI/Button/Button";
 import Page from "../components/UI/Page";
 import PageHeader from "../components/UI/PageHeader";
 import ResponsiveDataList from "../components/UI/ResponsiveDataList";
 import type { DataListColumn } from "../components/UI/dataListTypes";
-import { WORDS_PATH } from "../paths";
 
 import "./style.scss";
 
 export default function MyDictionariesPage() {
   const { t } = useTranslation();
   const [dictionaries, setDictionaries] = useState<UserDictionary[]>([]);
+  const [publicDictionaries, setPublicDictionaries] = useState<PublicDictionary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,6 +24,7 @@ export default function MyDictionariesPage() {
     try {
       const items = await getMyDictionaries();
       setDictionaries(items);
+      setPublicDictionaries(await getPublicDictionaries());
     } catch (loadError) {
       setError(
         loadError instanceof Error ? loadError.message : t("dictionariesPage.loadFailed"),
@@ -76,14 +77,23 @@ export default function MyDictionariesPage() {
         label: t("table.dictionaries.actions"),
         mobileRole: "detail",
         render: (row) =>
-          row.isDefault ? (
-            <Link to={WORDS_PATH}>{t("dictionariesPage.viewWords")}</Link>
+          row.isOwner ? (
+            <Button
+              style="secondary"
+              onClick={() => {
+                void setDictionaryPublic(row.id, !row.isPublic).then(() => loadDictionaries());
+              }}
+            >
+              {row.isPublic
+                ? t("dictionariesPage.unpublish")
+                : t("dictionariesPage.publish")}
+            </Button>
           ) : (
             "—"
           ),
       },
     ],
-    [t],
+    [loadDictionaries, t],
   );
 
   return (
@@ -102,6 +112,16 @@ export default function MyDictionariesPage() {
           emptyMessage={t("dictionariesPage.empty")}
         />
       ) : null}
+      <h2>{t("dictionariesPage.publicTitle")}</h2>
+      <ul>
+        {publicDictionaries.map((dictionary) => (
+          <li key={dictionary.id}>
+            {dictionary.name} · {dictionary.creatorName}
+            {dictionary.verified ? ` · ${t("dictionariesPage.verified")}` : ""}
+            {dictionary.words.length > 0 ? ` · ${dictionary.words.join(", ")}` : ""}
+          </li>
+        ))}
+      </ul>
     </Page>
   );
 }

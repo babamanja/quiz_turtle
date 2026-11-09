@@ -6,7 +6,7 @@ import { restoreDeletedAccount } from "../api/auth";
 import type { AccountDeletedLocationState } from "../authNavigationTypes";
 import Button from "../components/UI/Button/Button";
 import TextInput from "../components/UI/TextInput";
-import { homePathForRole } from "../paths";
+import { homePathForUser } from "../paths";
 import { setStoredSession } from "../userStorage";
 
 import "./style.scss";
@@ -70,7 +70,7 @@ export default function AccountDeletedPage() {
           try {
             const session = await restoreDeletedAccount({ idToken: response.credential });
             setStoredSession({ token: session.token, user: session.user });
-            navigate(homePathForRole(session.user.role), { replace: true });
+            navigate(homePathForUser(session.user), { replace: true });
           } catch (error) {
             setMessage(error instanceof Error ? error.message : t("accountDeleted.restoreFailed"));
           } finally {
@@ -93,7 +93,7 @@ export default function AccountDeletedPage() {
     try {
       const session = await restoreDeletedAccount({ email, password });
       setStoredSession({ token: session.token, user: session.user });
-      navigate(homePathForRole(session.user.role), { replace: true });
+      navigate(homePathForUser(session.user), { replace: true });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("accountDeleted.restoreFailed"));
     } finally {

@@ -15,6 +15,8 @@ import {
   getAdminLanguages,
   getAdminVocabWords,
 } from "../../api/admin";
+import { languagesTaughtByUser } from "../../appMode";
+import { getStoredUser } from "../../userStorage";
 import {
   type AdminStory,
   deleteAdminStory,
@@ -145,6 +147,7 @@ export default function AdminStoryEditorPage() {
   const storyId = Number(storyIdParam);
 
   const [languages, setLanguages] = useState<AdminLanguage[]>([]);
+  const taughtLanguages = languagesTaughtByUser(languages, getStoredUser()?.taughtLanguageIds);
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<StoryStatus>("draft");
   const [primaryLanguageId, setPrimaryLanguageId] = useState<number | "">("");
@@ -477,7 +480,7 @@ export default function AdminStoryEditorPage() {
                 setLearningLanguageId(value ? Number(value) : "");
               }}
             >
-              {languages.map((language) => (
+              {taughtLanguages.map((language) => (
                 <option key={language.id} value={language.id}>
                   {language.name}
                 </option>

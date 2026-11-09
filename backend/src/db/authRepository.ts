@@ -1,3 +1,4 @@
+import { defaultRoleForEmail } from "../services/adminBootstrap.service.js";
 import { getPrisma } from "./prisma.js";
 
 export type UserAuthRow = {
@@ -97,10 +98,14 @@ export async function upsertPasswordAuth(input: {
   passwordHash: string;
 }): Promise<UserAuthRow> {
   const normalizedEmail = input.email.trim().toLowerCase();
+  const role = defaultRoleForEmail(normalizedEmail);
   const row = await getPrisma().user.upsert({
     where: { email: normalizedEmail },
-    update: { userName: input.userName.trim() },
-    create: { userName: input.userName.trim(), email: normalizedEmail },
+    update: {
+      userName: input.userName.trim(),
+      ...(role === "admin" ? { role } : {}),
+    },
+    create: { userName: input.userName.trim(), email: normalizedEmail, role },
     include: { auth: true },
   });
   const auth = await getPrisma().auth.upsert({
@@ -118,6 +123,7 @@ export async function upsertGoogleAuth(input: {
   userName: string;
 }): Promise<{ row: UserAuthRow; isNewUser: boolean }> {
   const normalizedEmail = input.email.trim().toLowerCase();
+  const role = defaultRoleForEmail(normalizedEmail);
   const priorUser = await getPrisma().user.findUnique({
     where: { email: normalizedEmail },
   });
@@ -125,11 +131,16 @@ export async function upsertGoogleAuth(input: {
 
   const user = await getPrisma().user.upsert({
     where: { email: normalizedEmail },
-    update: { userName: input.userName.trim(), emailVerifiedAt: new Date() },
+    update: {
+      userName: input.userName.trim(),
+      emailVerifiedAt: new Date(),
+      ...(role === "admin" ? { role } : {}),
+    },
     create: {
       userName: input.userName.trim(),
       email: normalizedEmail,
       emailVerifiedAt: new Date(),
+      role,
     },
   });
   const auth = await getPrisma().auth.upsert({

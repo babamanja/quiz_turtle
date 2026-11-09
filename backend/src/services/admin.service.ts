@@ -1,6 +1,8 @@
 import * as adminRepository from "../db/adminRepository.js";
+import { getPrisma } from "../db/prisma.js";
 import * as paymentRepository from "../db/paymentRepository.js";
 import * as subscriptionRepository from "../db/subscriptionRepository.js";
+import * as teacherLanguageRepository from "../db/teacherLanguageRepository.js";
 
 export async function listUsers(input: adminRepository.AdminUsersListQuery) {
   const result = await adminRepository.selectAdminUsers(input);
@@ -45,10 +47,49 @@ export async function getUserDetails(userId: number) {
         telegram: row.hasTelegram,
       },
       vocabPairCount: row.vocabPairCount,
+      taughtLanguageIds: row.taughtLanguageIds,
       subscription: row.subscription,
       recentPayments: row.recentPayments,
     },
   };
+}
+
+export async function setUserTaughtLanguages(userId: number, languageIdsRaw: unknown) {
+  if (!Number.isInteger(userId) || userId < 1) {
+    return { ok: false as const, status: 400, error: "invalid user id" };
+  }
+  if (!Array.isArray(languageIdsRaw)) {
+    return { ok: false as const, status: 400, error: "languageIds required" };
+  }
+
+  const languageIds: number[] = [];
+  for (const value of languageIdsRaw) {
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
+      return { ok: false as const, status: 400, error: "invalid language id" };
+    }
+    languageIds.push(value);
+  }
+  const unique = [...new Set(languageIds)];
+
+  const user = await getPrisma().user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { id: true },
+  });
+  if (!user) {
+    return { ok: false as const, status: 404, error: "user not found" };
+  }
+  if (unique.length > 0) {
+    const found = await getPrisma().language.count({ where: { id: { in: unique } } });
+    if (found !== unique.length) {
+      return { ok: false as const, status: 400, error: "invalid language id" };
+    }
+  }
+
+  const taughtLanguageIds = await teacherLanguageRepository.replaceTeacherLanguages(
+    userId,
+    unique,
+  );
+  return { ok: true as const, taughtLanguageIds };
 }
 
 export async function grantPremiumSubscriptionByAdmin(input: {

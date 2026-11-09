@@ -3,16 +3,21 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 
 import { createRequestId, trackAnalyticsEvent } from "../../analytics";
+import { refreshSession } from "../../api/auth";
 import {
+  type AdminLanguage,
   type AdminUserDetails,
+  getAdminLanguages,
   getAdminUserDetails,
   grantAdminPremiumSubscription,
   refundAdminPayment,
+  setAdminUserTaughtLanguages,
 } from "../../api/admin";
 import Button from "../../components/UI/Button/Button";
 import ResponsiveDataList from "../../components/UI/ResponsiveDataList";
 import type { DataListColumn } from "../../components/UI/dataListTypes";
 import { useAdminPage } from "../../hooks/useAdminPage";
+import { getStoredUser, setStoredSession } from "../../userStorage";
 import { formatRelativeTime } from "../../utils/convertTime";
 
 type FieldRow = {
@@ -31,6 +36,10 @@ export default function AdminUserDetailsPage() {
   const [premiumEndAt, setPremiumEndAt] = useState("");
   const [isGrantingPremium, setIsGrantingPremium] = useState(false);
   const [refundingPaymentId, setRefundingPaymentId] = useState<string | null>(null);
+  const [languages, setLanguages] = useState<AdminLanguage[]>([]);
+  const [taughtLanguageIds, setTaughtLanguageIds] = useState<number[]>([]);
+  const [isSavingLanguages, setIsSavingLanguages] = useState(false);
+  const [languagesMessage, setLanguagesMessage] = useState<string | null>(null);
 
   const loadUserDetails = useCallback(async () => {
     const id = Number(userId);
@@ -56,12 +65,54 @@ export default function AdminUserDetailsPage() {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    if (user) {
+      setTaughtLanguageIds(user.taughtLanguageIds);
+    }
+  }, [user?.id, user?.taughtLanguageIds]);
+
+  useEffect(() => {
+    void getAdminLanguages()
+      .then(setLanguages)
+      .catch(() => {
+        setLanguages([]);
+      });
+  }, []);
+
   const premiumEndAtMin = (() => {
     const nextMinute = new Date(Date.now() + 60_000);
     const offsetMinutes = nextMinute.getTimezoneOffset();
     const local = new Date(nextMinute.getTime() - offsetMinutes * 60_000);
     return local.toISOString().slice(0, 16);
   })();
+
+  async function handleSaveTaughtLanguages() {
+    setActionError(null);
+    setLanguagesMessage(null);
+    const id = Number(userId);
+    if (!Number.isInteger(id) || id < 1) {
+      setActionError(t("admin.userDetailsInvalidId"));
+      return;
+    }
+    setIsSavingLanguages(true);
+    try {
+      const saved = await setAdminUserTaughtLanguages(id, taughtLanguageIds);
+      setTaughtLanguageIds(saved.taughtLanguageIds);
+      setLanguagesMessage(t("admin.userDetailsTaughtLanguagesSaved"));
+      if (getStoredUser()?.id === id) {
+        const session = await refreshSession();
+        setStoredSession({ token: session.token, user: session.user });
+      }
+    } catch (saveError) {
+      setActionError(
+        saveError instanceof Error
+          ? saveError.message
+          : t("admin.userDetailsTaughtLanguagesFailed"),
+      );
+    } finally {
+      setIsSavingLanguages(false);
+    }
+  }
 
   async function handleGrantPremium() {
     setActionError(null);
@@ -330,6 +381,34 @@ export default function AdminUserDetailsPage() {
         data={profileRows}
         getRowKey={(row) => row.id}
       />
+
+      <h2>{t("admin.userDetailsTaughtLanguages")}</h2>
+      <ul className="app-nav__list">
+        {languages.map((language) => (
+          <li key={language.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={taughtLanguageIds.includes(language.id)}
+                onChange={(event) => {
+                  setTaughtLanguageIds((current) =>
+                    event.target.checked
+                      ? [...current, language.id]
+                      : current.filter((languageId) => languageId !== language.id),
+                  );
+                }}
+              />{" "}
+              {language.name}
+            </label>
+          </li>
+        ))}
+      </ul>
+      <Button onClick={() => void handleSaveTaughtLanguages()} disabled={isSavingLanguages}>
+        {isSavingLanguages
+          ? t("admin.userDetailsTaughtLanguagesSaving")
+          : t("admin.userDetailsTaughtLanguagesSave")}
+      </Button>
+      {languagesMessage ? <p role="status">{languagesMessage}</p> : null}
 
       <h2>{t("admin.userDetailsSubscriptionSection")}</h2>
       <h3>{t("admin.userDetailsGrantPremiumSection")}</h3>

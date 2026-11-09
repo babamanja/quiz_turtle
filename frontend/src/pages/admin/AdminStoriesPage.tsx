@@ -7,6 +7,8 @@ import {
   type AdminLanguage,
   getAdminLanguages,
 } from "../../api/admin";
+import { languagesTaughtByUser } from "../../appMode";
+import { getStoredUser } from "../../userStorage";
 import {
   type AdminStoryListItem,
   createAdminStory,
@@ -40,6 +42,7 @@ export default function AdminStoriesPage() {
   const [statusFilter, setStatusFilter] = useState<StoryStatus | "">("");
   const [page, setPage] = useState(1);
   const [languages, setLanguages] = useState<AdminLanguage[]>([]);
+  const taughtLanguages = languagesTaughtByUser(languages, getStoredUser()?.taughtLanguageIds);
   const [formOpen, setFormOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [primaryLanguageId, setPrimaryLanguageId] = useState<number | "">("");
@@ -339,7 +342,7 @@ export default function AdminStoriesPage() {
               required
             >
               <option value="">{t("admin.storiesSelectLanguage")}</option>
-              {languages.map((language) => (
+              {taughtLanguages.map((language) => (
                 <option key={language.id} value={language.id}>
                   {language.name}
                 </option>

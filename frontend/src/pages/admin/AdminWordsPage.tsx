@@ -11,6 +11,8 @@ import {
   getAdminVocabWords,
   type PaginationMeta,
 } from "../../api/admin";
+import { languagesTaughtByUser } from "../../appMode";
+import { getStoredUser } from "../../userStorage";
 import Button from "../../components/UI/Button/Button";
 import ButtonLink from "../../components/UI/Button/ButtonLink";
 import Modal from "../../components/UI/Modal";
@@ -108,6 +110,7 @@ export default function AdminWordsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = useMemo(() => parseAdminWordsQuery(searchParams), [searchParams]);
   const [languages, setLanguages] = useState<AdminLanguage[]>([]);
+  const taughtLanguages = languagesTaughtByUser(languages, getStoredUser()?.taughtLanguageIds);
   const [formOpen, setFormOpen] = useState(false);
   const [text, setText] = useState("");
   const [formLanguageId, setFormLanguageId] = useState<number | "">("");
@@ -317,7 +320,7 @@ export default function AdminWordsPage() {
           }}
         >
           <option value="">{t("admin.wordsAllLanguages")}</option>
-          {languages.map((language) => (
+          {taughtLanguages.map((language) => (
             <option key={language.id} value={language.id}>
               {language.name}
             </option>
@@ -440,7 +443,7 @@ export default function AdminWordsPage() {
               setFormLanguageId(value ? Number(value) : "");
             }}
           >
-            {languages.map((language) => (
+            {taughtLanguages.map((language) => (
               <option key={language.id} value={language.id}>
                 {language.name}
               </option>
